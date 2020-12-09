@@ -11,7 +11,7 @@ module AdventOfCode
         @raw_sequence = raw_sequence
       end
 
-      def call(input: StandardProgramInput.new, output: StandardProgramOutput.new)
+      def call(input: StandardProgramInput.interactive, output: StandardProgramOutput.new)
         execution =
           Execution.new(
             program: self,
@@ -24,7 +24,7 @@ module AdventOfCode
         execution.program
       end
 
-      def blockable_executor(input: StandardProgramInput.new, output: StandardProgramOutput.new)
+      def blockable_executor(input: StandardProgramInput.interactive, output: StandardProgramOutput.new)
         BlockableExecutor.new(
           Execution.new(
             program: self,
@@ -94,7 +94,7 @@ module AdventOfCode
         program:,
         instruction_pointer: 0,
         relative_base: 0,
-        input: StandardProgramInput.new,
+        input: StandardProgramInput.interactive,
         output: StandardProgramOutput.new
       )
         @program = program
@@ -348,6 +348,14 @@ module AdventOfCode
     class StandardProgramInput
       attr_reader :display_prompt
 
+      def self.interactive
+        new(display_prompt: true)
+      end
+
+      def self.piped
+        new(display_prompt: false)
+      end
+
       def initialize(display_prompt: true)
         @display_prompt = display_prompt
       end
@@ -355,7 +363,7 @@ module AdventOfCode
       def read_int
         puts("?: ") if display_prompt
 
-        read_line.to_i
+        gets.to_i
       end
 
       def ready?
