@@ -1,32 +1,42 @@
 module AdventOfCode
   class DayOne
     def self.for(input: $stdin)
-      new(input.readlines.map(&:to_i))
+      lines = input.readlines
+      depths = lines.map { |line| Depth.parse(line) }
+      new(DepthSeries.new(depths))
     end
 
-    attr_reader :depths
+    attr_reader :depth_series
 
-    def initialize(depths)
-      @depths = depths
+    def initialize(depth_series)
+      @depth_series = depth_series
     end
 
     def part_one
-      depths.each_cons(2).reduce(0) do |increases, (previous_depth, current_depth)|
-        if previous_depth < current_depth
-          increases + 1
-        else
-          increases
-        end
-      end
+      depth_series.each_pair.count(&:increasing?)
     end
 
     def part_two
-      depths.each_cons(3).each_cons(2).reduce(0) do |increases, (previous_depths, current_depths)|
-        if previous_depths.sum < current_depths.sum
-          increases + 1
-        else
-          increases
-        end
+      depth_sliding_windows.each_pair.count(&:increasing?)
+    end
+
+    def depth_sliding_windows
+      Shared::List.new(depth_series.sliding_window(size: 3))
+    end
+
+    class Depth < Shared::NumberValue; end
+
+    DepthSeries = Shared::List.of(Depth) do
+      include Comparable
+
+      def <=>(other)
+        return nil unless instance_of?(other.class)
+
+        sum <=> other.sum
+      end
+
+      def sum
+        items.sum(Depth.zero)
       end
     end
   end
