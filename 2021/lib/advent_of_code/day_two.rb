@@ -1,7 +1,9 @@
 module AdventOfCode
   class DayTwo
     def self.for(input: $stdin)
-      new(input.readlines)
+      lines = input.readlines
+      commands = lines.map { |line| Command.parse(line) }
+      new(commands)
     end
 
     attr_reader :commands
@@ -26,17 +28,14 @@ module AdventOfCode
       def self.call(submarine, command)
         position = submarine.position
 
-        action, distance_string = command.split(" ")
-        distance = distance_string.to_i
-
         new_position =
-          case action
+          case command.action
           when "forward"
-            position.forward(distance)
+            position.forward(command.units)
           when "down"
-            position.down(distance)
+            position.down(command.units)
           when "up"
-            position.up(distance)
+            position.up(command.units)
           else
             raise "Action not recognized: #{action}"
           end
@@ -50,21 +49,34 @@ module AdventOfCode
         position = submarine.position
         aim = submarine.aim
 
-        action, units_string = command.split(" ")
-        units = units_string.to_i
-
-        case action
+        case command.action
         when "forward"
-          position = position.forward(units).down(aim * units)
+          position = position.forward(command.units).down(aim * command.units)
         when "down"
-          aim += units
+          aim += command.units
         when "up"
-          aim -= units
+          aim -= command.units
         else
           raise "Action not recognized: #{action}"
         end
 
         submarine.with(position: position, aim: aim)
+      end
+    end
+
+    class Command < Shared::Model
+      attribute :action, type: String
+      attribute :units, type: Integer
+
+      def self.parse(str)
+        parts = str.split(" ")
+        raise(ArgumentError, "Failed to parse command: #{str}") unless parts.size == 2
+
+        action, units_string = *parts
+        units = units_string.to_i
+        raise(ArgumentError, "Invalid units: #{units_string}") unless units.to_s == units_string
+
+        new(action: action, units: units)
       end
     end
   end

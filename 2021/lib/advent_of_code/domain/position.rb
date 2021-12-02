@@ -1,19 +1,11 @@
 module AdventOfCode
   module Domain
-    class Position
-      attr_reader :depth, :horizontal
+    class Position < Shared::Model
+      attribute :depth, type: Integer
+      attribute :horizontal, type: Integer
 
       def self.origin
         new(depth: 0, horizontal: 0)
-      end
-
-      def initialize(depth:, horizontal:)
-        @depth = depth
-        @horizontal = horizontal
-      end
-
-      def with(depth: self.depth, horizontal: self.horizontal)
-        self.class.new(depth: depth, horizontal: horizontal)
       end
 
       def forward(distance)
