@@ -2,7 +2,7 @@ module AdventOfCode
   class DayOne
     def self.for(input: $stdin)
       lines = input.readlines
-      depths = lines.map { |line| Depth.parse(line) }
+      depths = lines.map { |line| Domain::Depth.parse(line) }
       new(DepthSeries.new(depths))
     end
 
@@ -24,9 +24,7 @@ module AdventOfCode
       Shared::List.new(depth_series.sliding_window(size: 3))
     end
 
-    class Depth < Shared::NumberValue; end
-
-    DepthSeries = Shared::List.of(Depth) do
+    DepthSeries = Shared::List.of(Domain::Depth) do
       include Comparable
 
       def <=>(other)
@@ -36,7 +34,7 @@ module AdventOfCode
       end
 
       def sum
-        items.sum(Depth.zero)
+        items.sum(Domain::Depth.zero)
       end
     end
   end

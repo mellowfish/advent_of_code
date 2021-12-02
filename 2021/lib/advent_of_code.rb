@@ -4,6 +4,10 @@ require_relative "advent_of_code/shared/list"
 require_relative "advent_of_code/shared/value"
 require_relative "advent_of_code/shared/number_value"
 
+require_relative "advent_of_code/domain/depth"
+require_relative "advent_of_code/domain/position"
+require_relative "advent_of_code/domain/submarine"
+
 require_relative "advent_of_code/day_one"
 require_relative "advent_of_code/day_two"
 require_relative "advent_of_code/day_three"
