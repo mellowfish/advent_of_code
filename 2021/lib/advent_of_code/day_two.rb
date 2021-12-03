@@ -25,7 +25,7 @@ module AdventOfCode
     end
 
     module CartesianCommands
-      def self.call(submarine, command)
+      def self.call(submarine, command) # rubocop:disable Metrics/MethodLength
         position = submarine.position
 
         new_position =
@@ -45,7 +45,7 @@ module AdventOfCode
     end
 
     module AimableCommands
-      def self.call(submarine, command)
+      def self.call(submarine, command) # rubocop:disable Metrics/MethodLength
         position = submarine.position
         aim = submarine.aim
 

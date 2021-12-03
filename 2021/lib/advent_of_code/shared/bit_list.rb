@@ -34,7 +34,7 @@ module AdventOfCode
       end
 
       def to_decimal
-        bits.drop_while { |bit| bit.zero? }.join.to_i(2)
+        bits.drop_while(&:zero?).join.to_i(2)
       end
 
       def at(index)

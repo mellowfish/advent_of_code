@@ -8,17 +8,9 @@ module AdventOfCode
           attributes[name] = {}.tap do |hash|
             hash[:validate_instance] =
               if !type.nil?
-                ->(instance) do
-                  return if instance.is_a?(type)
-
-                  raise(ArgumentError, "Expected type #{type}, got: #{instance.class}, for attribute: #{name}")
-                end
+                build_type_check_lambda(name: name, type: type)
               elsif !respond_to.nil?
-                ->(instance) do
-                  return if instance.respond_to?(respond_to)
-
-                  raise(ArgumentError, "Expected #{instance.inspect} to respond_to?(:#{respond_to}), for attribute: #{name}")
-                end
+                build_respond_to_lambda(name: name, respond_to: respond_to)
               else
                 raise ArgumentError, "Cannot validate attribute, expected type: or respond_to: but got neither"
               end
@@ -32,6 +24,27 @@ module AdventOfCode
 
         def attributes
           @attributes ||= {}
+        end
+
+      private
+
+        def build_type_check_lambda(name:, type:)
+          ->(instance) do
+            return if instance.is_a?(type)
+
+            raise(ArgumentError, "Expected type #{type}, got: #{instance.class}, for attribute: #{name}")
+          end
+        end
+
+        def build_respond_to_lambda(name:, respond_to:)
+          ->(instance) do
+            return if instance.respond_to?(respond_to)
+
+            raise(
+              ArgumentError,
+              "Expected #{instance.inspect} to respond_to?(:#{respond_to}), for attribute: #{name}"
+            )
+          end
         end
       end
 
@@ -55,7 +68,7 @@ module AdventOfCode
         end
       end
 
-      def set_given_attributes(params)
+      def set_given_attributes(params) # rubocop:disable Naming/AccessorMethodName
         params.each do |key, value|
           instance_variable_set("@#{key}", value)
         end
@@ -64,9 +77,8 @@ module AdventOfCode
       def handle_missing_attributes(params)
         (class_attributes.keys - params.keys).each do |missing_field|
           info = attribute_info(missing_field)
-          if info[:required] && info[:default].nil?
-            raise ArgumentError, "Missing required field: #{missing_field}"
-          end
+
+          raise(ArgumentError, "Missing required field: #{missing_field}") if info[:required] && info[:default].nil?
 
           instance_variable_set("@#{missing_field}", class_attributes[missing_field][:default])
         end

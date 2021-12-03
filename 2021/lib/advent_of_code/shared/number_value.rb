@@ -15,7 +15,6 @@ module AdventOfCode
         end
       end
 
-
       def +(other)
         raise ArgumentError unless instance_of?(other.class)
 

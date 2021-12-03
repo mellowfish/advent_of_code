@@ -9,15 +9,15 @@ module AdventOfCode
       end
 
       def forward(distance)
-        with(horizontal: self.horizontal + distance)
+        with(horizontal: horizontal + distance)
       end
 
       def down(distance)
-        with(depth: self.depth + distance)
+        with(depth: depth + distance)
       end
 
       def up(distance)
-        new_depth = self.depth - distance
+        new_depth = depth - distance
 
         raise(ArgumentError, "This tub can't fly, captain!") if new_depth.negative?
 

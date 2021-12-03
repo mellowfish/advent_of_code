@@ -12,11 +12,11 @@ module AdventOfCode
       end
 
       def most_common_bits
-        BitList.new(rotate.map { |column_bit_list| column_bit_list.most_common_bit })
+        BitList.new(rotate.map(&:most_common_bit))
       end
 
       def least_common_bits
-        BitList.new(rotate.map { |column_bit_list| column_bit_list.least_common_bit })
+        BitList.new(rotate.map(&:least_common_bit))
       end
 
       def size
@@ -36,14 +36,14 @@ module AdventOfCode
         rotate.row_bit_list(index)
       end
 
-      def filter(&block)
-        with(matrix.select { |bits| block.call(BitList.new(bits)) })
+      def filter
+        with(matrix.select { |bits| yield BitList.new(bits) })
       end
 
     protected
 
-      def map(&block)
-        matrix.map { |row| block.call(BitList.new(row)) }
+      def map
+        matrix.map { |row| yield BitList.new(row) }
       end
 
     private
