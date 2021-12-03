@@ -1,11 +1,14 @@
 require "pry"
 
+require_relative "advent_of_code/shared/bit_list"
+require_relative "advent_of_code/shared/bit_matrix"
 require_relative "advent_of_code/shared/list"
 require_relative "advent_of_code/shared/value"
 require_relative "advent_of_code/shared/number_value"
 require_relative "advent_of_code/shared/model"
 
 require_relative "advent_of_code/domain/depth"
+require_relative "advent_of_code/domain/diagnostic_data"
 require_relative "advent_of_code/domain/position"
 require_relative "advent_of_code/domain/submarine"
 

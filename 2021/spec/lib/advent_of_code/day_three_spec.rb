@@ -1024,7 +1024,8 @@ RSpec.describe AdventOfCode::DayThree do
   describe "#part_one" do
     context "with simple input" do
       it "works" do
-        diagnostic_data = described_class.for(input: StringIO.new(simple_input)).part_one
+        diagnostic_data = described_class.for(input: StringIO.new(simple_input)).diagnostic_data
+
         expect(diagnostic_data.gamma_rate).to eq(22)
         expect(diagnostic_data.epsilon_rate).to eq(9)
       end
@@ -1032,7 +1033,8 @@ RSpec.describe AdventOfCode::DayThree do
 
     context "with full input" do
       it "works" do
-        diagnostic_data = described_class.for(input: StringIO.new(full_input)).part_one
+        diagnostic_data = described_class.for(input: StringIO.new(full_input)).diagnostic_data
+
         expect(diagnostic_data.gamma_rate).to eq(3808)
         expect(diagnostic_data.epsilon_rate).to eq(287)
       end
@@ -1042,7 +1044,8 @@ RSpec.describe AdventOfCode::DayThree do
   describe "#part_two" do
     context "with simple input" do
       it "works" do
-        diagnostic_data = described_class.for(input: StringIO.new(simple_input)).part_two
+        diagnostic_data = described_class.for(input: StringIO.new(simple_input)).diagnostic_data
+
         expect(diagnostic_data.oxygen_generator_rating).to eq(23)
         expect(diagnostic_data.co2_scrubber_rating).to eq(10)
       end
@@ -1050,7 +1053,8 @@ RSpec.describe AdventOfCode::DayThree do
 
     context "with full input" do
       it "works" do
-        diagnostic_data = described_class.for(input: StringIO.new(full_input)).part_two
+        diagnostic_data = described_class.for(input: StringIO.new(full_input)).diagnostic_data
+
         expect(diagnostic_data.oxygen_generator_rating).to eq(3443)
         expect(diagnostic_data.co2_scrubber_rating).to eq(1357)
       end
