@@ -20,6 +20,7 @@ module AdventOfCode
           end
 
           attr_reader name
+          alias_method "#{name}?", name if type == :boolean
         end
 
         def attributes
@@ -30,7 +31,12 @@ module AdventOfCode
 
         def build_type_check_lambda(name:, type:)
           ->(instance) do
-            return if instance.is_a?(type)
+            case type
+            when :boolean
+              return if instance.is_a?(TrueClass) || instance.is_a?(FalseClass)
+            when Class
+              return if instance.is_a?(type)
+            end
 
             raise(ArgumentError, "Expected type #{type}, got: #{instance.class}, for attribute: #{name}")
           end
@@ -80,7 +86,13 @@ module AdventOfCode
 
           raise(ArgumentError, "Missing required field: #{missing_field}") if info[:required] && info[:default].nil?
 
-          instance_variable_set("@#{missing_field}", class_attributes[missing_field][:default])
+          default_value =
+            if info[:default].respond_to?(:call)
+              info[:default].call
+            else
+              info[:default]
+            end
+          instance_variable_set("@#{missing_field}", default_value)
         end
       end
 

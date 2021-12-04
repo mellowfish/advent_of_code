@@ -7,7 +7,7 @@ module AdventOfCode
             super(items, type: target_type)
           end
 
-          class_exec(&block)
+          class_exec(&block) if block
         end
       end
 
@@ -50,7 +50,64 @@ module AdventOfCode
         items.size
       end
 
-    private
+      def at(index)
+        items[index]
+      end
+
+      def first
+        at(0)
+      end
+
+      def last
+        at(size - 1)
+      end
+
+      def any?(&block)
+        items.any?(&block)
+      end
+
+      def all?(&block)
+        items.all?(&block)
+      end
+
+      def find(&block)
+        items.find(&block)
+      end
+
+      def map(type: self.class, &block)
+        type.new(items.map(&block))
+      end
+
+      def partition(&block)
+        items.partition(&block).map { |list| with(list) }
+      end
+
+      def append(item)
+        append_all([item])
+      end
+
+      def append_all(new_items)
+        if new_items.is_a?(List)
+          with(items + new_items.items)
+        else
+          with(items + new_items)
+        end
+      end
+
+      def remove_at(index)
+        raise IndexError if index >= items.size
+
+        new_items = items.dup
+        item = new_items.delete_at(index)
+
+        [item, with(new_items)]
+      end
+
+      def reject(&block)
+        with(items.reject(&block))
+      end
+
+    protected
 
       attr_reader :items, :type
     end
