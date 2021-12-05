@@ -103,6 +103,10 @@ module AdventOfCode
         [item, with(new_items)]
       end
 
+      def filter(&block)
+        with(items.select(&block))
+      end
+
       def reject(&block)
         with(items.reject(&block))
       end
