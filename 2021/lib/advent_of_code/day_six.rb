@@ -1,40 +1,43 @@
 module AdventOfCode
   class DaySix
     class Fish < Shared::Model
-      attribute :age, type: Integer
+      DAYS_TO_FIRST_BREEDING = 8
+      DAYS_TO_NEXT_BREEDING = 6
+
+      attribute :days_to_next_breeding, type: Integer
 
       def self.baby
-        new(age: 8)
+        new(days_to_next_breeding: DAYS_TO_FIRST_BREEDING)
       end
 
       def self.breeder
-        new(age: 0)
+        new(days_to_next_breeding: 0)
       end
 
-      def reproducing?
-        age.zero?
+      def breeding?
+        days_to_next_breeding.zero?
       end
 
       def grow_older
-        if age.zero?
-          with(age: 6)
+        if breeding?
+          with(days_to_next_breeding: DAYS_TO_NEXT_BREEDING)
         else
-          with(age: age - 1)
+          with(days_to_next_breeding: days_to_next_breeding - 1)
         end
       end
 
       def to_s
-        age.to_s
+        days_to_next_breeding.to_s
       end
 
       def hash
-        age.hash
+        days_to_next_breeding.hash
       end
 
       def ==(other)
         return false unless other.is_a?(Fish)
 
-        age == other.age
+        days_to_next_breeding == other.days_to_next_breeding
       end
 
       alias_method :eql?, :==
@@ -42,32 +45,32 @@ module AdventOfCode
 
     class School
       def self.parse(line)
-        ages = line.split(",").map(&:to_i)
-        fish = ages.map { |age| Fish.new(age: age) }
-        age_groups = fish.tally
-        new(age_groups)
+        numbers = line.split(",").map(&:to_i)
+        fish = numbers.map { |number| Fish.new(days_to_next_breeding: number) }
+        broods = fish.tally
+        new(broods)
       end
 
-      attr_reader :age_groups
+      attr_reader :broods
 
-      def initialize(age_groups)
-        @age_groups = age_groups
+      def initialize(broods)
+        @broods = broods
       end
 
       def grow_older
         self.class.new(
-          Hash.new { |hash, key| hash[key] = 0 }.tap do |new_age_groups|
-            new_age_groups[Fish.baby] = age_groups[Fish.breeder] || 0
+          Hash.new { |hash, key| hash[key] = 0 }.tap do |new_broods|
+            new_broods[Fish.baby] = broods[Fish.breeder] || 0
 
-            age_groups.each do |fish, tally|
-              new_age_groups[fish.grow_older] += tally
+            broods.each do |fish, tally|
+              new_broods[fish.grow_older] += tally
             end
           end
         )
       end
 
       def size
-        age_groups.values.sum
+        broods.values.sum
       end
     end
 
