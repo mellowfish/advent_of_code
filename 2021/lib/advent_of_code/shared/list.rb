@@ -12,7 +12,11 @@ module AdventOfCode
       end
 
       def initialize(items, type: items.first.class)
-        raise ArgumentError if type == NilClass
+        raise(ArgumentError, "type is required") if type == NilClass
+
+        items.each do |item|
+          raise(ArgumentError, "Expected a list of items with type: #{type}, got one with type: #{item.class}") unless item.is_a?(type)
+        end
 
         @items = items
         @type = type
