@@ -528,7 +528,7 @@ RSpec.describe AdventOfCode::DayFive do
 
     context "with full input" do
       it "works" do
-        expect(described_class.for(input: StringIO.new(full_input)).part_one).to eq(42)
+        expect(described_class.for(input: StringIO.new(full_input)).part_one).to eq(5585)
       end
     end
   end
@@ -542,7 +542,7 @@ RSpec.describe AdventOfCode::DayFive do
 
     context "with full input" do
       it "works" do
-        expect(described_class.for(input: StringIO.new(full_input)).part_two).to eq(42)
+        expect(described_class.for(input: StringIO.new(full_input)).part_two).to eq(17193)
       end
     end
   end

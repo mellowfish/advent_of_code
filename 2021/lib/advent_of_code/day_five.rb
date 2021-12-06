@@ -1,99 +1,9 @@
 module AdventOfCode
   class DayFive
-    class Point < Shared::Model
-      attribute :x, type: Integer
-      attribute :y, type: Integer
-
-      def self.parse(str)
-        x_str, y_str = str.split(",").map(&:strip)
-
-        new(x: x_str.to_i, y: y_str.to_i)
-      end
-
-      def ==(other)
-        return false unless other.is_a?(Point)
-
-        x == other.x && y == other.y
-      end
-
-      def hash
-        [x, y].hash
-      end
-
-      alias_method :eql?, :==
-
-      def +(other)
-        raise ArgumentError unless other.is_a?(Point)
-
-        with(
-          x: x + other.x,
-          y: y + other.y
-        )
-      end
-
-      def to_s
-        "#{x},#{y}"
-      end
-    end
-
-    class Line < Shared::Model
-      attribute :start_point, type: Point
-      attribute :end_point, type: Point
-
-      def self.parse(str)
-        start_str, end_str = str.split("->").map(&:strip)
-
-        new(start_point: Point.parse(start_str), end_point: Point.parse(end_str))
-      end
-
-      def vertical?
-        start_point.x == end_point.x
-      end
-
-      def horizontal?
-        start_point.y == end_point.y
-      end
-
-      def slope
-        return @slope if defined?(@slope)
-
-        dx = end_point.x - start_point.x
-        dy = end_point.y - start_point.y
-        if dx.zero?
-          dy /= dy.abs
-        elsif dy.zero?
-          dx /= dx.abs
-        elsif dx.abs == dy.abs
-          dx /= dx.abs
-          dy /= dy.abs
-        else
-          raise "Sloped lines not supported yet!"
-        end
-
-        @slope =
-          Point.new(
-            x: dx,
-            y: dy
-          )
-      end
-
-      def each_point
-        point = start_point
-        while point != end_point
-          yield point
-
-          point += slope
-        end
-        yield end_point
-      end
-    end
-
-    VentList = Shared::List.of(Line)
-
     def self.for(input: $stdin)
       lines = input.readlines.map(&:chomp)
 
-      new(VentList.new(lines.map { |line| Line.parse(line) }))
+      new(VentList.new(lines.map { |line| Shared::Line.parse(line) }))
     end
 
     attr_reader :vent_list, :vent_map
@@ -114,6 +24,8 @@ module AdventOfCode
 
       vent_map.overlapping_points.size
     end
+
+    VentList = Shared::List.of(Shared::Line)
 
     class VentMap < Shared::Model
       attribute :vent_list, type: VentList

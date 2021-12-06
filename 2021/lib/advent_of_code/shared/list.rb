@@ -54,6 +54,10 @@ module AdventOfCode
         items.size
       end
 
+      def empty?
+        size.zero?
+      end
+
       def at(index)
         items[index]
       end

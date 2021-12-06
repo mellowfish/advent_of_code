@@ -92,12 +92,7 @@ module AdventOfCode
     end
 
     def simulate(days)
-      puts "Day: 0: #{school.size}"
-
-      days.times do |day|
-        @school = school.grow_older
-        puts "Day: #{day + 1}: #{school.size}"
-      end
+      days.times { @school = school.grow_older }
     end
   end
 end

@@ -17,7 +17,7 @@ module AdventOfCode
     end
 
     def part_two
-      games << games.last.call_next_number while games.last.loser?
+      games << games.last.call_next_number while games.last.unfinished?
 
       games.last.losing_score
     end
@@ -106,7 +106,7 @@ module AdventOfCode
         attribute :won_boards, type: BoardList, default: -> { BoardList.new([]) }
 
         def winner?
-          boards.any?(&:won?)
+          won_boards.any?
         end
 
         def winning_score
@@ -125,8 +125,12 @@ module AdventOfCode
           boards.first || won_boards.last
         end
 
-        def loser?
-          !boards.all?(&:won?)
+        def finished?
+          boards.empty?
+        end
+
+        def unfinished?
+          !finished?
         end
 
         def call_next_number
