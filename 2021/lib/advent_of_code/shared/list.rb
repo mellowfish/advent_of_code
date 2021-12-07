@@ -129,6 +129,18 @@ module AdventOfCode
         items.sum
       end
 
+      def sum_by(&block)
+        items.sum(&block)
+      end
+
+      def min_by(&block)
+        items.min_by(&block)
+      end
+
+      def max_by(&block)
+        items.max_by(&block)
+      end
+
     protected
 
       attr_reader :items, :type
