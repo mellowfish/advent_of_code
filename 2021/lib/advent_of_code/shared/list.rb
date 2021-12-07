@@ -119,6 +119,16 @@ module AdventOfCode
         with(items.reject(&block))
       end
 
+      def sorted
+        with(items.sort)
+      end
+
+      def sum
+        raise TypeError unless first.respond_to?(:+)
+
+        items.sum
+      end
+
     protected
 
       attr_reader :items, :type
