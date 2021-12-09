@@ -55,7 +55,9 @@ module AdventOfCode
     end
 
     def possible_crab_positions
-      CrabList.new((crab_fleet.first.position..crab_fleet.last.position).map { |position| Crab.new(position: position) })
+      CrabList.new(
+        (crab_fleet.first.position..crab_fleet.last.position).map { |position| Crab.new(position: position) }
+      )
     end
   end
 end

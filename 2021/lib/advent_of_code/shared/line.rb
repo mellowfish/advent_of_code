@@ -18,7 +18,7 @@ module AdventOfCode
         start_point.y == end_point.y
       end
 
-      def slope
+      def slope # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
         return @slope if defined?(@slope)
 
         dx = end_point.x - start_point.x

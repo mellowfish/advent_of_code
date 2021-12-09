@@ -94,7 +94,7 @@ module AdventOfCode
           until lines.empty?
             lines.shift while lines.first.empty? # gap
             board_lines = lines.shift(5)
-            boards = boards.append(Board.parse(board_lines))
+            boards = boards.append(Board.parse(board_lines)) # rubocop:disable Style/RedundantSelfAssignment
           end
 
           new(call_list: call_list, boards: boards)

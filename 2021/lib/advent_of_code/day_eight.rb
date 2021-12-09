@@ -55,8 +55,8 @@ module AdventOfCode
           str.split(" | ")
              .map(&:strip)
              .map do |part|
-                part.split(" ").map { |segments_str| segments_str.chars.sort }
-              end
+               part.split(" ").map { |segments_str| segments_str.chars.sort }
+             end
 
         new(
           sample_digit_segments: sample_digit_segments,

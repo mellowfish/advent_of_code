@@ -6,20 +6,13 @@ module AdventOfCode
           name = name.to_sym
 
           attributes[name] = {}.tap do |hash|
-            hash[:validate_instance] =
-              if !type.nil?
-                build_type_check_lambda(name: name, type: type)
-              elsif !respond_to.nil?
-                build_respond_to_lambda(name: name, respond_to: respond_to)
-              else
-                raise ArgumentError, "Cannot validate attribute, expected type: or respond_to: but got neither"
-              end
-
+            hash[:validate_instance] = validation_lambda(name: name, type: type, respond_to: respond_to)
             hash[:required] = required
             hash[:default] = default
           end
 
           attr_reader name
+
           alias_method "#{name}?", name if type == :boolean
         end
 
@@ -28,6 +21,16 @@ module AdventOfCode
         end
 
       private
+
+        def validation_lambda(name:, type: nil, respond_to: nil)
+          if !type.nil?
+            build_type_check_lambda(name: name, type: type)
+          elsif !respond_to.nil?
+            build_respond_to_lambda(name: name, respond_to: respond_to)
+          else
+            raise ArgumentError, "Cannot validate attribute, expected type: or respond_to: but got neither"
+          end
+        end
 
         def build_type_check_lambda(name:, type:)
           ->(instance) do
@@ -86,12 +89,7 @@ module AdventOfCode
 
           raise(ArgumentError, "Missing required field: #{missing_field}") if info[:required] && info[:default].nil?
 
-          default_value =
-            if info[:default].respond_to?(:call)
-              info[:default].call
-            else
-              info[:default]
-            end
+          default_value = info[:default].respond_to?(:call) ? info[:default].call : info[:default]
           instance_variable_set("@#{missing_field}", default_value)
         end
       end

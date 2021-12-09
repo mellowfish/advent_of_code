@@ -1,6 +1,6 @@
 module AdventOfCode
   module Shared
-    class List
+    class List # rubocop:disable Metrics/ClassLength
       def self.of(target_type, &block)
         Class.new(List) do
           define_method(:initialize) do |items, **_ignored_params|
@@ -15,7 +15,9 @@ module AdventOfCode
         raise(ArgumentError, "type is required") if type == NilClass
 
         items.each do |item|
-          raise(ArgumentError, "Expected a list of items with type: #{type}, got one with type: #{item.class}") unless item.is_a?(type)
+          next if item.is_a?(type)
+
+          raise(ArgumentError, "Expected a list of items with type: #{type}, got one with type: #{item.class}")
         end
 
         @items = items
