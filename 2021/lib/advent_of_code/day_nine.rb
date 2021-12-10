@@ -79,23 +79,29 @@ module AdventOfCode
         @basins ||= filter_out_basin_duplicates(build_basins)
       end
 
-      def build_basins # rubocop:disable Metrics/MethodLength
+      def build_basins
         low_points.map do |low_point|
-          [].tap do |basin|
-            cells_to_check = [low_point]
+          basin_from_low_point(low_point)
+        end
+      end
 
-            until cells_to_check.empty?
-              cell = cells_to_check.pop
-              next if basin.include?(cell)
+      def basin_from_low_point(low_point)
+        [].tap do |basin|
+          cells_to_check = [low_point]
 
-              basin << cell
+          until cells_to_check.empty?
+            cell = cells_to_check.pop
+            next if basin.include?(cell)
 
-              valid_neighbors =
-                neighbors_of(cell).reject { |neighbor| basin.include?(neighbor) || neighbor.peak? || cell >= neighbor }
-              cells_to_check.concat(valid_neighbors)
-            end
+            basin << cell
+
+            cells_to_check.concat(neighbors_to_check_in_basin(cell: cell, basin: basin))
           end
         end
+      end
+
+      def neighbors_to_check_in_basin(cell:, basin:)
+        neighbors_of(cell).reject { |neighbor| basin.include?(neighbor) || neighbor.peak? || cell >= neighbor }
       end
 
       def print_with_basin(basin)
