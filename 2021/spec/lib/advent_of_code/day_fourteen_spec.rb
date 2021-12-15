@@ -158,14 +158,14 @@ RSpec.describe AdventOfCode::DayFourteen do
 
   describe "#part_two" do
     context "with simple input" do
-      fit "works" do
+      it "works" do
         expect(described_class.for(input: StringIO.new(simple_input)).part_two).to eq(2188189693529)
       end
     end
 
     context "with full input" do
       it "works" do
-        expect(described_class.for(input: StringIO.new(full_input)).part_two).to eq(42)
+        expect(described_class.for(input: StringIO.new(full_input)).part_two).to eq(3459822539451)
       end
     end
   end
