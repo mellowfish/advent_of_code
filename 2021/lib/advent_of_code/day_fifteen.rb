@@ -28,8 +28,8 @@ module AdventOfCode
 
       attribute :matrix, type: Array
 
-      def safest_path_score
-        distance_to_nodes[node_count - 1]
+      def safest_path_score(destination = node_count - 1)
+        distance_to_nodes[destination]
       end
 
       def expand(multiplier = 5)
@@ -66,11 +66,19 @@ module AdventOfCode
         end
       end
 
-    private
-
       def node_count
         width * height
       end
+
+      def height
+        matrix.size
+      end
+
+      def width
+        matrix.first.size
+      end
+
+    private
 
       def find_shortest_path(destination, path = [0])
         return path if shortest_previous_neighbor[destination] == -1
@@ -96,7 +104,7 @@ module AdventOfCode
       end
 
       def compute_paths(source = 0)
-        infinity = node_count * 10
+        infinity = node_count * 100
         @distance_to_nodes = Array.new(node_count, infinity)
         @shortest_previous_neighbor = Array.new(node_count, -1)
         @distance_to_nodes[source] = 0
@@ -107,14 +115,14 @@ module AdventOfCode
           puts unvisited_nodes.size if node_count > 10_000 && (unvisited_nodes.size % 1_000).zero?
           node_to_visit = nil
 
-          unvisited_nodes.find do |minimum_node_index|
+          unvisited_nodes.each do |minimum_node_index|
             if node_to_visit.nil? || (@distance_to_nodes[minimum_node_index] < @distance_to_nodes[node_to_visit])
               node_to_visit = minimum_node_index
             end
           end
 
           if @distance_to_nodes[node_to_visit] == infinity
-            binding.pry
+            raise "wat"
             break
           end
 
@@ -122,6 +130,7 @@ module AdventOfCode
 
           neighbors_of(node_to_visit / width, node_to_visit % width).each do |neighbor_row, neighbor_column|
             target_index = neighbor_row * width + neighbor_column
+
             known_distance = matrix[neighbor_row][neighbor_column]
 
             new_distance = distance_to_nodes[node_to_visit] + known_distance
@@ -142,14 +151,6 @@ module AdventOfCode
           neighbors << [row, column - 1] if column.positive?
           neighbors << [row, column + 1] if column < (width - 1)
         end
-      end
-
-      def height
-        matrix.size
-      end
-
-      def width
-        matrix.first.size
       end
     end
   end
