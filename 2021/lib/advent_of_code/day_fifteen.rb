@@ -11,12 +11,14 @@ module AdventOfCode
     end
 
     def part_one
-      cave.safest_path
+      cave.print
+      cave.safest_path_score
     end
 
     def part_two
-      # puts cave.expand.matrix.map(&:join)
-      cave.expand.safest_path
+      new_cave = cave.expand
+      new_cave.print
+      new_cave.safest_path_score
     end
 
     class ChitonousCave < Shared::Model
@@ -26,7 +28,7 @@ module AdventOfCode
 
       attribute :matrix, type: Array
 
-      def safest_path
+      def safest_path_score
         distance_to_nodes[node_count - 1]
       end
 
@@ -47,16 +49,33 @@ module AdventOfCode
         with(matrix: new_matrix)
       end
 
+      def print(destination = node_count - 1)
+        path = find_shortest_path(destination)
+
+        matrix.each_with_index do |cells, row|
+          puts(
+            cells.each_with_index.map do |cell, column|
+              index = row * width + column
+              if path.include?(index)
+                "#{cell}*"
+              else
+                "#{cell} "
+              end
+            end.join
+          )
+        end
+      end
+
     private
 
       def node_count
         width * height
       end
 
-      def find_shortest_path(destination, path = [])
-        if shortest_previous_neighbor[destination] == -1
-          find_shortest_path(shortest_previous_neighbor[destination], path)
-        end
+      def find_shortest_path(destination, path = [0])
+        return path if shortest_previous_neighbor[destination] == -1
+
+        find_shortest_path(shortest_previous_neighbor[destination], path)
         path << destination
       end
 
@@ -83,9 +102,9 @@ module AdventOfCode
         @distance_to_nodes[source] = 0
         unvisited_nodes = (0...node_count).to_a
 
-        puts unvisited_nodes.size
+        puts unvisited_nodes.size if node_count > 10_000
         until unvisited_nodes.empty?
-          puts unvisited_nodes.size if (unvisited_nodes.size % 1_000).zero?
+          puts unvisited_nodes.size if node_count > 10_000 && (unvisited_nodes.size % 1_000).zero?
           node_to_visit = nil
 
           unvisited_nodes.find do |minimum_node_index|
@@ -101,10 +120,9 @@ module AdventOfCode
 
           unvisited_nodes.delete(node_to_visit)
 
-          # puts "checking node #{node_to_visit} (#{node_to_visit / width},#{node_to_visit % width})"
-
-          node_matrix[node_to_visit].each_with_index do |known_distance, target_index|
-            next if known_distance.zero?
+          neighbors_of(node_to_visit / width, node_to_visit % width).each do |neighbor_row, neighbor_column|
+            target_index = neighbor_row * width + neighbor_column
+            known_distance = matrix[neighbor_row][neighbor_column]
 
             new_distance = distance_to_nodes[node_to_visit] + known_distance
 
@@ -114,21 +132,6 @@ module AdventOfCode
             end
           end
         end
-      end
-
-      def node_matrix
-        @node_matrix ||=
-          Array.new(node_count) { Array.new(node_count, 0) }.tap do |nodes|
-            matrix.each_with_index do |cells, row|
-              cells.each_with_index do |level, column|
-                node_index = row * width + column
-                neighbors_of(row, column).each do |neighbor_row, neighbor_column|
-                  neighbor_node_index = neighbor_row * width + neighbor_column
-                  nodes[neighbor_node_index][node_index] = level
-                end
-              end
-            end
-          end
       end
 
       def neighbors_of(row, column)
