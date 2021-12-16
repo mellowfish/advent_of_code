@@ -141,7 +141,7 @@ RSpec.describe AdventOfCode::DayFifteen do
     end
 
     context "with full input" do
-      fit "works" do
+      xit "works" do
         expect(described_class.for(input: StringIO.new(full_input)).part_two).to eq(42)
       end
     end
