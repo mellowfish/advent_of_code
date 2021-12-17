@@ -10,6 +10,10 @@ module AdventOfCode
         new(x: x_str.to_i, y: y_str.to_i)
       end
 
+      def self.origin
+        new(x: 0, y: 0)
+      end
+
       def ==(other)
         return false unless other.is_a?(Point)
 

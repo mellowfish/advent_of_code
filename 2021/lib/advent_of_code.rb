@@ -9,6 +9,7 @@ require_relative "advent_of_code/shared/model"
 
 require_relative "advent_of_code/shared/point"
 require_relative "advent_of_code/shared/line"
+require_relative "advent_of_code/shared/rectangle"
 
 require_relative "advent_of_code/domain/depth"
 require_relative "advent_of_code/domain/diagnostic_data"
