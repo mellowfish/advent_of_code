@@ -6,7 +6,8 @@ module AdventOfCode
           name = name.to_sym
 
           attributes[name] = {}.tap do |hash|
-            hash[:validate_instance] = validation_lambda(name: name, type: type, respond_to: respond_to)
+            hash[:validate_instance] =
+              validation_lambda(name: name, type: type, respond_to: respond_to, required: required)
             hash[:required] = required
             hash[:default] = default
           end
@@ -20,23 +21,35 @@ module AdventOfCode
           @attributes ||= {}
         end
 
+        def inherited(subclass)
+          super(subclass)
+
+          return if self == Model
+
+          subclass.instance_variable_set("@attributes", attributes.dup)
+        end
+
       private
 
-        def validation_lambda(name:, type: nil, respond_to: nil)
+        def validation_lambda(name:, required:, type: nil, respond_to: nil)
           if !type.nil?
-            build_type_check_lambda(name: name, type: type)
+            build_type_check_lambda(name: name, required: required, type: type)
           elsif !respond_to.nil?
-            build_respond_to_lambda(name: name, respond_to: respond_to)
+            build_respond_to_lambda(name: name, required: required, respond_to: respond_to)
           else
             raise ArgumentError, "Cannot validate attribute, expected type: or respond_to: but got neither"
           end
         end
 
-        def build_type_check_lambda(name:, type:)
+        def build_type_check_lambda(name:, required:, type:)
           ->(instance) do
+            return if !required && instance.nil?
+
             case type
             when :boolean
               return if instance.is_a?(TrueClass) || instance.is_a?(FalseClass)
+            when Array
+              return if type.any? { |type_option| instance.is_a?(type_option) }
             when Class
               return if instance.is_a?(type)
             end
@@ -45,8 +58,9 @@ module AdventOfCode
           end
         end
 
-        def build_respond_to_lambda(name:, respond_to:)
+        def build_respond_to_lambda(name:, required:, respond_to:)
           ->(instance) do
+            return if !required && instance.nil?
             return if instance.respond_to?(respond_to)
 
             raise(
