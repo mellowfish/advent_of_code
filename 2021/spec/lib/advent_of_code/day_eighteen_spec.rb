@@ -115,7 +115,7 @@ RSpec.describe AdventOfCode::DayEighteen do
   describe AdventOfCode::DayEighteen::SnailFishNumber do
     describe "#parse" do
       context "with a valid string" do
-        it "returns the number" do
+        xit "returns the number" do
           expect(described_class.parse("[[[[[9,8],1],2],3],4]").to_s).to(
             eq("[[[[[9,8],1],2],3],4]")
           )
@@ -125,7 +125,7 @@ RSpec.describe AdventOfCode::DayEighteen do
 
     describe "#explode" do
       context "with no number to the left" do
-        fit "works" do
+        xit "works" do
           expect(described_class.parse("[[[[[9,8],1],2],3],4]").explode.to_s).to(
             eq("[[[[0,9],2],3],4]")
           )
