@@ -451,6 +451,80 @@ RSpec.describe AdventOfCode::DayTwentyTwo do
     TXT
   end
 
+  describe Range do
+    describe "parts_after_intersecting_with" do
+      context "with identical ranges" do
+        it "returns the intersection range" do
+          expect((1..4).intersect_with(1..4)).to(
+            eq(intersection: (1..4))
+          )
+        end
+      end
+
+      context "with non-intersecting ranges" do
+        it "returns nothing" do
+          expect((1..4).intersect_with(5..6)).to(
+            eq({})
+          )
+        end
+      end
+
+      context "with ranges that line up at the start" do
+        it "returns intersection and trailing ranges" do
+          expect((1..4).intersect_with(1..2)).to(
+            eq(
+              intersection: (1..2),
+              trailing: (3..4)
+            )
+          )
+        end
+      end
+
+      context "with ranges that line up at the end" do
+        it "returns leading and intersection ranges" do
+          expect((1..4).intersect_with(3..4)).to(
+            eq(
+              leading: (1..2),
+              intersection: (3..4)
+            )
+          )
+        end
+      end
+
+      context "with one range inside the other" do
+        it "returns all the sub ranges" do
+          expect((1..4).intersect_with(2..3)).to(
+            eq(
+              leading: (1..1),
+              intersection: (2..3),
+              trailing: (4..4)
+            )
+          )
+        end
+      end
+
+      context "ranges that only partly overlap" do
+        it "returns all the sub ranges" do
+          expect((1..4).intersect_with(4..6)).to(
+            eq(
+              leading: (1..3),
+              intersection: (4..4),
+              trailing: (5..6)
+            )
+          )
+
+          expect((1..4).intersect_with(3..6)).to(
+            eq(
+              leading: (1..2),
+              intersection: (3..4),
+              trailing: (5..6)
+            )
+          )
+        end
+      end
+    end
+  end
+
   describe "#part_one" do
     context "with simple input" do
       it "works" do
@@ -467,7 +541,7 @@ RSpec.describe AdventOfCode::DayTwentyTwo do
 
   describe "#part_two" do
     context "with simple input" do
-      fit "works" do
+      xit "works" do
         expect(described_class.for(input: StringIO.new(simple_input)).part_two).to eq(2758514936282235)
       end
     end

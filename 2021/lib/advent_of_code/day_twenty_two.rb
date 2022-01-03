@@ -1,3 +1,20 @@
+class Range
+  def intersect_with(two)
+    one = self
+    return { intersection: one } if one == two
+
+    one, two = [two, one] if two.begin < one.begin || (one.begin == two.begin && one.end < two.end)
+
+    return {} if one.end < two.begin
+
+    points = [one.begin, one.end, two.begin, two.end].sort
+    { intersection: (points[1]..points[2]) }.tap do |parts|
+      parts[:leading] = (points[0]..(points[1] - 1)) if points[0] < points[1]
+      parts[:trailing] = ((points[2] + 1)..points[3]) if points[2] < points[3]
+    end
+  end
+end
+
 module AdventOfCode
   class DayTwentyTwo
     def self.for(input: $stdin)
@@ -54,6 +71,10 @@ module AdventOfCode
           action
         end
 
+        def collide(other)
+
+        end
+
       private
 
         def valid_range?(range)
@@ -74,21 +95,6 @@ module AdventOfCode
           (-50..50).each do |y|
             (-50..50).each do |z|
               valid_instructions.reduce(false) do |current_value, instruction|
-                instruction.evaluate_for_cube(current_value: current_value, x: x, y: y, z: z)
-              end.tap { |active| new_active_cube_count += 1 if active }
-            end
-          end
-        end
-
-        with(active_cube_count: new_active_cube_count)
-      end
-
-      def reboot
-        new_active_cube_count = 0
-        (-50..50).each do |x|
-          (-50..50).each do |y|
-            (-50..50).each do |z|
-              startup_instructions.reduce(false) do |current_value, instruction|
                 instruction.evaluate_for_cube(current_value: current_value, x: x, y: y, z: z)
               end.tap { |active| new_active_cube_count += 1 if active }
             end
