@@ -51,8 +51,7 @@ fn pair_of_pairs_exists(characters: &Vec<char>) -> bool {
 
 fn split_pair_exists(characters: &Vec<char>) -> bool {
     for start_pair_index in 0..=(characters.len() - 3) {
-        if characters[start_pair_index] == characters[start_pair_index + 2] &&
-            characters[start_pair_index] != characters[start_pair_index + 1] {
+        if characters[start_pair_index] == characters[start_pair_index + 2] {
             return true;
         }
     }
@@ -104,7 +103,7 @@ mod tests {
     fn part_two() {
         assert_eq!(
             input().lines().filter(|line| !line.is_empty() && part_two_is_nice(line)).count(),
-            52 // this is wrong
+            55
         )
     }
 }
