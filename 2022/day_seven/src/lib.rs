@@ -1,5 +1,4 @@
-use std::borrow::Borrow;
-use std::ops::{Deref, DerefMut};
+use std::collections::HashMap;
 
 struct FileEntry {
     name: String,
@@ -7,20 +6,16 @@ struct FileEntry {
 }
 
 impl FileEntry {
-    fn new(input: &str) -> Self {
-        let parts : Vec<&str> = input.split(" ").collect();
-        if parts.len() != 2 {
-            panic!("Malformed file line: {input}")
-        }
-
-        Self { name: parts[1].to_string(), size: parts[0].parse().unwrap() }
+    fn new(name: &str, size: usize) -> Self {
+        Self { name: name.to_string(), size }
     }
 }
 
 struct DirectoryEntry {
     parent: Option<String>,
     name: String,
-    entries: Vec<FileSystemEntry>
+    children: Vec<String>,
+    files: Vec<FileEntry>
 }
 
 impl DirectoryEntry {
@@ -35,11 +30,11 @@ impl DirectoryEntry {
     }
 
     fn root() -> Self {
-        Self { parent: None, name: String::from("/"), entries: vec![] }
+        Self { parent: None, name: String::from("/"), children: vec![], files: vec![] }
     }
 
     fn new(parent: &str, name: &str) -> Self {
-        Self { parent: Some(parent.to_string()), name: name.to_string(), entries: vec![] }
+        Self { parent: Some(parent.to_string()), name: name.to_string(), children: vec![], files: vec![] }
     }
 
     fn path(&self) -> String {
@@ -49,67 +44,32 @@ impl DirectoryEntry {
         }
     }
 
-    fn add(&mut self, entry: FileSystemEntry) {
-        self.entries.push(entry)
+    fn total_file_size(&self) -> usize {
+        self.files.iter().map(|file| file.size).sum()
     }
 
-    fn add_directory(&mut self, name: &str) -> Box<&DirectoryEntry> {
-        self.entries.push(FileSystemEntry::DirectoryEntry(DirectoryEntry::new(self.path().as_str(), name)));
-
-        match self.entries.last().unwrap() {
-            FileSystemEntry::DirectoryEntry(directory_entry) => {
-                return Box::from(directory_entry);
-            },
-            _ => { panic!("Unexpected type") }
-        }
+    fn add_file(&mut self, entry: FileEntry) {
+        self.files.push(entry)
     }
 
-    fn traverse(&mut self, path: &str, add_missing_directories: bool) -> &DirectoryEntry {
-        if path.is_empty() || path.eq("/") {
-            return self;
-        }
+    fn add_directory(&mut self, name: &str) -> String {
+        let name_string = name.to_string();
 
-        let mut parts = path.split("/");
-        let current_segment = parts.next().unwrap();
-        let rest = parts.collect::<Vec<&str>>().join("/");
+        self.children.push(name_string.clone());
 
-        for entry in self.entries.iter() {
-            match entry {
-                FileSystemEntry::DirectoryEntry(mut directory_entry) => {
-                    if directory_entry.name.eq(current_segment) {
-                        return directory_entry.traverse(rest.as_str(), add_missing_directories);
-                    }
-                },
-                FileSystemEntry::FileEntry(_) => {}
-            }
-        }
-
-        if add_missing_directories {
-            let rtn : &DirectoryEntry;
-            unsafe {
-                let boxed_entry = self.add_directory(current_segment);
-                let directory_entry = boxed_entry.deref().deref();
-                rtn = directory_entry.traverse(rest.as_str(), add_missing_directories);
-            }
-            return rtn;
-        }
-
-        panic!("No directory at path: {path}")
+        Self::build_path(&self.path(), &name_string)
     }
-}
-
-enum FileSystemEntry {
-    FileEntry(FileEntry),
-    DirectoryEntry(DirectoryEntry)
 }
 
 struct FileSystem {
-    root: DirectoryEntry
+    root: HashMap<String, DirectoryEntry>
 }
 
 impl FileSystem {
     fn new() -> Self {
-        Self { root: DirectoryEntry::root() }
+        Self {
+            root: HashMap::from([(String::from("/"), DirectoryEntry::root())])
+        }
     }
 
     fn from_bash_session(input: &str) -> Self {
@@ -120,18 +80,37 @@ impl FileSystem {
     }
 
     fn add_directory(&mut self, parent_directory: &str, new_directory: &str) {
-        self.root.traverse(
-            DirectoryEntry::build_path(&parent_directory.to_string(), &new_directory.to_string()).as_str(),
-            true
-        );
+        let new_path = self.root.get_mut(parent_directory).unwrap().add_directory(new_directory);
+
+        self.root.insert(new_path, DirectoryEntry::new(parent_directory, new_directory));
     }
 
-    fn get_directory(&mut self, path: &str) -> &DirectoryEntry {
-        self.root.traverse(path, false)
+    fn add_file(&mut self, parent_directory: &str, file_name: &str, file_size: usize) {
+        self.root.get_mut(parent_directory).unwrap().add_file(FileEntry::new(file_name, file_size))
     }
 
-    fn get_parent_path(&mut self, path: &str) -> String {
-        self.get_directory(DirectoryEntry::extract_parent_path(&path.to_string()).as_str()).path()
+    fn get_directory(&self, path: &str) -> &DirectoryEntry {
+        self.root.get(path).unwrap()
+    }
+
+    fn directory_size(&self, path: &str) -> usize {
+        let path_string = path.to_string();
+        let directory = self.get_directory(path);
+        let mut size = directory.total_file_size();
+
+        for child_dir in directory.children.iter() {
+            size += self.directory_size(DirectoryEntry::build_path(&path_string, &child_dir).as_str())
+        }
+
+        size
+    }
+
+    fn smaller_folders(&self) -> Vec<(String, usize)> {
+        let mut directories = self.root.values().map(|directory| (directory.path(), self.directory_size(directory.path().as_str()))).collect::<Vec<(String, usize)>>();
+
+        directories.sort_by_key(|(path, size)| *size);
+
+        directories.iter().filter(|(path, size)| *size < 100000).collect()
     }
 }
 
@@ -142,7 +121,10 @@ struct BashSession {
 
 impl BashSession {
     fn new() -> Self {
-        Self { file_system: FileSystem::new(), current_directory: String::from("/") }
+        Self {
+            file_system: FileSystem::new(),
+            current_directory: String::from("/")
+        }
     }
 
     fn run_commands(&mut self, input: &str) {
@@ -153,9 +135,7 @@ impl BashSession {
             match parts[0] {
                 "$" => {
                     match parts[1] {
-                        "ls" => {
-                            // TODO
-                        },
+                        "ls" => {},
                         "cd" => {
                             self.change_directory(parts[2]);
                         },
@@ -166,7 +146,7 @@ impl BashSession {
                     self.add_directory(parts[1]);
                 },
                 _ => {
-                    // TODO: file listing
+                    self.add_file(parts[1], parts[0].parse::<usize>().unwrap());
                 }
             }
         }
@@ -176,12 +156,17 @@ impl BashSession {
         self.file_system.add_directory(&self.current_directory, directory)
     }
 
+    fn add_file(&mut self, file_name: &str, file_size: usize) {
+        self.file_system.add_file(&self.current_directory, file_name, file_size)
+    }
+
     fn change_directory(&mut self, directory: &str) {
         self.current_directory =
             match directory {
                 ".." => {
-                    self.file_system.get_parent_path(&self.current_directory)
+                    DirectoryEntry::extract_parent_path(&self.current_directory)
                 },
+                "/"=> { String::from("/") }
                 _ => {
                     DirectoryEntry::build_path(&self.current_directory, &directory.to_string())
                 }
