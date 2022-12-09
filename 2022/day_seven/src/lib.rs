@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
+#[derive(Debug)]
 struct FileEntry {
+    #[allow(dead_code)]
     name: String,
     size: usize
 }
@@ -11,6 +13,7 @@ impl FileEntry {
     }
 }
 
+#[derive(Debug)]
 struct DirectoryEntry {
     parent: Option<String>,
     name: String,
@@ -20,7 +23,11 @@ struct DirectoryEntry {
 
 impl DirectoryEntry {
     fn build_path(parent: &String, child: &String) -> String {
-        format!("{}/{}", parent, child)
+        if parent == "/" {
+            format!("/{child}")
+        } else {
+            format!("{parent}/{child}")
+        }
     }
 
     fn extract_parent_path(path: &String) -> String {
@@ -105,12 +112,46 @@ impl FileSystem {
         size
     }
 
+    fn directory_sizes(&self) -> Vec<usize> {
+        let mut directories = self.root.values().map(|directory| self.directory_size(directory.path().as_str())).collect::<Vec<usize>>();
+
+        directories.sort();
+        directories.reverse();
+
+        directories
+    }
+
     fn smaller_folders(&self) -> Vec<usize> {
-        let mut directories = self.root.values().map(|directory| (directory.path(), self.directory_size(directory.path().as_str()))).collect::<Vec<(String, usize)>>();
+        self.directory_sizes().iter()
+            .filter(|size| **size < 100000)
+            .map(|size| *size)
+            .collect()
+    }
 
-        directories.sort_by_key(|(path, size)| *size);
+    fn used_space(&self) -> usize {
+        self.directory_size("/")
+    }
 
-        directories.iter().filter(|(path, size)| *size < 100000).map(|(path, size)| *size).collect()
+    fn free_space(&self) -> usize {
+        70000000 - self.used_space()
+    }
+
+    fn space_to_free_up_for_update(&self) -> usize {
+        30000000 - self.free_space()
+    }
+
+    fn smallest_folder_size_to_delete(&self) -> usize {
+        let target_size = self.space_to_free_up_for_update();
+        let mut last_directory_size = 0;
+
+        for &directory_size in self.directory_sizes().iter() {
+            if directory_size < target_size {
+                return last_directory_size;
+            }
+            last_directory_size = directory_size
+        }
+
+        0
     }
 }
 
@@ -189,5 +230,19 @@ mod tests {
     fn part_one() {
         let file_system = FileSystem::from_bash_session(fs::read_to_string("input.txt").unwrap().as_str());
         assert_eq!(file_system.smaller_folders().iter().sum::<usize>(), 1555642);
+    }
+
+    #[test]
+    fn part_two_example() {
+        let file_system = FileSystem::from_bash_session(fs::read_to_string("example_input.txt").unwrap().as_str());
+
+        assert_eq!(file_system.smallest_folder_size_to_delete(), 24933642);
+    }
+
+    #[test]
+    fn part_two() {
+        let file_system = FileSystem::from_bash_session(fs::read_to_string("input.txt").unwrap().as_str());
+
+        assert_eq!(file_system.smallest_folder_size_to_delete(), 5974547);
     }
 }
