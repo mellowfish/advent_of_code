@@ -105,12 +105,12 @@ impl FileSystem {
         size
     }
 
-    fn smaller_folders(&self) -> Vec<(String, usize)> {
+    fn smaller_folders(&self) -> Vec<usize> {
         let mut directories = self.root.values().map(|directory| (directory.path(), self.directory_size(directory.path().as_str()))).collect::<Vec<(String, usize)>>();
 
         directories.sort_by_key(|(path, size)| *size);
 
-        directories.iter().filter(|(path, size)| *size < 100000).collect()
+        directories.iter().filter(|(path, size)| *size < 100000).map(|(path, size)| *size).collect()
     }
 }
 
@@ -182,6 +182,12 @@ mod tests {
     #[test]
     fn part_one_examples() {
         let file_system = FileSystem::from_bash_session(fs::read_to_string("example_input.txt").unwrap().as_str());
-        assert_eq!(file_system.smaller_folders().iter().map(DirectoryEntry::size), 95437);
+        assert_eq!(file_system.smaller_folders().iter().sum::<usize>(), 95437);
+    }
+
+    #[test]
+    fn part_one() {
+        let file_system = FileSystem::from_bash_session(fs::read_to_string("input.txt").unwrap().as_str());
+        assert_eq!(file_system.smaller_folders().iter().sum::<usize>(), 1555642);
     }
 }
