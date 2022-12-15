@@ -23,7 +23,7 @@ impl Point {
 
 struct HeightMap {
     data: Vec<Vec<Altitude>>,
-    nodes: Vec<Vec<usize>>,
+    nodes: Vec<usize>,
     total_nodes: usize,
     start_position: Point,
     end_position: Point
@@ -53,7 +53,7 @@ impl HeightMap {
         }).collect();
 
         let total_nodes = data.len() * data[0].len();
-        let nodes : Vec<Vec<usize>> = vec![vec![usize::MAX; total_nodes]; total_nodes];
+        let nodes : Vec<usize> = vec![usize::MAX; total_nodes];
 
 
         Self { data, start_position, end_position, nodes, total_nodes }
@@ -68,11 +68,11 @@ impl HeightMap {
     }
 
     fn part_one_path_length(&self) -> usize {
-        self.path_length_to(self.end_node(), self.start_node())
+        self.path_length_to(self.start_node())
     }
 
     fn part_two_path_length(&self) -> usize {
-        let possible_paths : Vec<(usize, usize)> = self.possible_start_nodes().iter().map(|&start_node| (start_node, self.path_length_to(self.end_node(), start_node))).collect();
+        let possible_paths : Vec<(usize, usize)> = self.possible_start_nodes().iter().map(|&start_node| (start_node, self.path_length_to(start_node))).collect();
 
         // dbg!(&possible_paths);
 
@@ -95,12 +95,12 @@ impl HeightMap {
         nodes_to_start_from
     }
 
-    fn path_length_to(&self, from: usize, to: usize) -> usize {
-        self.nodes[from][to]
+    fn path_length_to(&self, to: usize) -> usize {
+        self.nodes[to]
     }
 
-    fn set_path_length_to(&mut self, from: usize, to: usize, distance: usize) {
-        self.nodes[from][to] = distance;
+    fn set_path_length_to(&mut self, to: usize, distance: usize) {
+        self.nodes[to] = distance;
     }
 
     fn point_for_node(&self, node: usize) -> Point {
@@ -112,13 +112,11 @@ impl HeightMap {
     }
 
     fn calculate_paths(&mut self) {
-        // for &node in self.possible_start_nodes().iter() {
         self.calculate_path(self.end_node());
-        // }
     }
 
     fn calculate_path(&mut self, start_node: usize) {
-        self.nodes[start_node][start_node] = 0;
+        self.nodes[start_node] = 0;
 
         // self.print();
 
@@ -126,15 +124,15 @@ impl HeightMap {
         let mut previous_nodes = vec![usize::MAX; self.total_nodes];
 
         while !to_visit.is_empty() {
-            to_visit.sort_by_key(|(node, _point)| self.path_length_to(start_node, *node));
+            to_visit.sort_by_key(|(node, _point)| self.path_length_to(*node));
             to_visit.reverse();
 
-            if to_visit.iter().all(|(node, _point)| self.path_length_to(start_node, *node) == usize::MAX) {
+            if to_visit.iter().all(|(node, _point)| self.path_length_to(*node) == usize::MAX) {
                 break;
             }
 
             let (node, point) = to_visit.pop().unwrap();
-            if self.path_length_to(start_node, node) == usize::MAX {
+            if self.path_length_to(node) == usize::MAX {
                 self.print();
                 dbg!(node, point);
                 panic!("Unexpected visit to infinite node")
@@ -148,9 +146,9 @@ impl HeightMap {
                 // dbg!(neighbor.clone());
 
                 if to_visit.contains(&neighbor) {
-                    let new_distance = self.path_length_to(start_node, node) + 1;
-                    if new_distance < self.path_length_to(start_node, neighbor_node) {
-                        self.set_path_length_to(start_node, neighbor_node, new_distance);
+                    let new_distance = self.path_length_to(node) + 1;
+                    if new_distance < self.path_length_to(neighbor_node) {
+                        self.set_path_length_to(neighbor_node, new_distance);
                         previous_nodes[neighbor_node] = node;
                     }
                 }
@@ -163,7 +161,7 @@ impl HeightMap {
         for (row, cells) in self.data.iter().enumerate() {
             for (column, _) in cells.iter().enumerate() {
                 let point = Point { x: column, y: row };
-                let distance = self.path_length_to(self.start_node(), self.node_for_point(&point));
+                let distance = self.path_length_to(self.node_for_point(&point));
                 if distance == usize::MAX {
                     print!("   ");
                 } else {
