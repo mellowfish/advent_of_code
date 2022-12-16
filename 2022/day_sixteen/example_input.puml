@@ -1,0 +1,62 @@
+@startuml
+[AA]
+component BB [
+BB: #2
+      13
+    x25s
+ =325
+]
+component CC [
+CC: #6
+      2
+    x6s
+ =12
+]
+component DD [
+DD: #1
+      20
+    x28s
+ =560
+]
+component EE [
+EE: #5
+      3
+    x9s
+ =27
+]
+[FF]
+[GG]
+component HH [
+HH: #4
+      22
+    x13s
+ =286
+]
+[II]
+component JJ [
+JJ: #3
+      21
+    x21s
+ =441
+]
+AA <--> DD
+AA <-r-> II
+AA <-l-> BB
+BB <--> CC
+CC <-r-> DD
+DD <--> EE
+EE <-r-> FF
+FF <-r-> GG
+GG <-r-> HH
+II <--> JJ
+'Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
+'Valve BB has flow rate=13; tunnels lead to valves CC, AA
+'Valve CC has flow rate=2; tunnels lead to valves DD, BB
+'Valve DD has flow rate=20; tunnels lead to valves CC, AA, EE
+'Valve EE has flow rate=3; tunnels lead to valves FF, DD
+'Valve FF has flow rate=0; tunnels lead to valves EE, GG
+'Valve GG has flow rate=0; tunnels lead to valves FF, HH
+'Valve HH has flow rate=22; tunnel leads to valve GG
+'Valve II has flow rate=0; tunnels lead to valves AA, JJ
+'Valve JJ has flow rate=21; tunnel leads to valve II
+@enduml
