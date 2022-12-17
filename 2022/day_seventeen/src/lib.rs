@@ -157,59 +157,96 @@ impl Chamber {
         let mut bottom_left = Point { x: 3, y: self.rock_height() + 4 };
 
         self.blit_rock(rock, &bottom_left);
-        self.print();
-        self.blank_rock(rock, &bottom_left);
+        // self.print();
         loop {
             match jet_cycle.next() {
                 None => panic!("Jets ran out of steam!"),
                 Some(Jet::Left) => {
-                    if self.can_move_left() {
+                    if self.can_move_left(rock, &bottom_left) {
                         self.blank_rock(rock, &bottom_left);
                         bottom_left = bottom_left.left();
                         self.blit_rock(rock, &bottom_left);
                     }
                 },
                 Some(Jet::Right) => {
-                    if self.can_move_right() {
+                    if self.can_move_right(rock, &bottom_left) {
                         self.blank_rock(rock, &bottom_left);
                         bottom_left = bottom_left.right();
                         self.blit_rock(rock, &bottom_left);
                     }
                 }
             }
-            self.print();
-            // TODO: check for collisions!
-            self.blank_rock(rock, &bottom_left);
-            if self.can_move_down() {
+
+            // self.print();
+            if self.can_move_down(rock, &bottom_left) {
+                self.blank_rock(rock, &bottom_left);
                 bottom_left = bottom_left.down();
+                self.blit_rock(rock, &bottom_left);
+                // self.print();
             } else {
-                todo!("Handle stopping")
+                self.halt_rock(rock, &bottom_left);
+                // self.print();
+                return;
             }
-            self.blit_rock(rock, &bottom_left);
-            self.print();
-
-            todo!()
         }
-
-        todo!()
     }
 
-    fn can_move_right(&self) -> bool {
-        for row in self.rows.iter().rev().take(10) {
+    fn can_move_right(&self, rock: &Shape, bottom_left: &Point) -> bool {
+        let top_right = rock.top_right(bottom_left);
+        for row in self.rows[bottom_left.y..=top_right.y].iter().rev() {
             for pair in row.windows(2) {
-                if pair['0'] == '@'
+                if pair[0] == '@' && !(pair[1] == '.' || pair[1] == '@') {
+                    return false
+                }
             }
         }
+
+        true
+    }
+
+    fn can_move_left(&self, rock: &Shape, bottom_left: &Point) -> bool {
+        let top_right = rock.top_right(bottom_left);
+        for row in self.rows[bottom_left.y..=top_right.y].iter().rev() {
+            for pair in row.windows(2) {
+                if pair[1] == '@' && !(pair[0] == '.' || pair[0] == '@') {
+                    return false
+                }
+            }
+        }
+
+        true
+    }
+
+    fn can_move_down(&self, rock: &Shape, bottom_left: &Point) -> bool {
+        let top_right = rock.top_right(bottom_left);
+        for row_pair in self.rows[(bottom_left.y - 1)..=top_right.y].windows(2) {
+            for column in 0..=8 {
+                if row_pair[1][column] == '@' && !(row_pair[0][column] == '.' || row_pair[0][column] == '@') {
+                    return false
+                }
+            }
+        }
+
+        true
     }
 
     fn blit_rock(&mut self, rock: &Shape, bottom_left: &Point) {
         let top_right = rock.top_right(bottom_left);
         for (row_index, row) in (bottom_left.y..=top_right.y).rev().enumerate() {
             for (column_index, column) in (bottom_left.x..=top_right.x).enumerate() {
-                if self.rows[row][column] != '.' {
-                    panic!("About to blow a hole in the universe!")
+                if rock.unwrap()[row_index][column_index] == '.' {
+                    continue;
                 }
-                self.rows[row][column] = rock.unwrap()[row_index][column_index];
+                if row >= self.rows.len() {
+                    self.print();
+                    dbg!(bottom_left, &top_right, row, row_index, column, column_index);
+                }
+                if self.rows[row][column] != '.' {
+                    self.print();
+                    dbg!(bottom_left, &top_right, row, row_index, column, column_index);
+                    panic!("About to blow a hole in the universe! {}", self.rows[row][column])
+                }
+                self.rows[row][column] = '@';
             }
         }
     }
@@ -223,15 +260,27 @@ impl Chamber {
         }
     }
 
+    fn halt_rock(&mut self, rock: &Shape, bottom_left: &Point) {
+        let top_right = rock.top_right(bottom_left);
+        for row in bottom_left.y..=top_right.y {
+            for column in bottom_left.x..=top_right.x {
+                match self.rows[row][column] {
+                    '@' => { self.rows[row][column] = '#' },
+                    _ => {}
+                }
+            }
+        }
+    }
+
     fn print(&self) {
-        for row in self.rows.iter().rev() {
-            println!("{}", String::from_iter(row.iter()))
+        for (index, row) in self.rows.iter().enumerate().rev() {
+            println!("{:4} {}", index, String::from_iter(row.iter()))
         }
         println!();
     }
 
     fn ensure_space_for_new_rock(&mut self, rock: &Shape) {
-        let delta : i32 = (self.rock_height() + rock.height() + 3) as i32 - self.rows.len() as i32;
+        let delta : i32 = (self.rock_height() + rock.height() + 4) as i32 - self.rows.len() as i32;
         if delta > 0 {
             for _ in 0..=delta {
                 self.add_empty_row();
@@ -260,6 +309,7 @@ impl Chamber {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
     use super::*;
 
     #[test]
@@ -267,5 +317,13 @@ mod tests {
         let mut chamber = Chamber::new(">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>");
         chamber.drop_rocks(2022);
         assert_eq!(chamber.rock_height(), 3068);
+    }
+
+    #[test]
+    fn part_one() {
+        let mut chamber = Chamber::new(fs::read_to_string("input.txt").unwrap().trim());
+        chamber.drop_rocks(2022);
+        assert_eq!(chamber.rock_height(), 3176); // too low
+        assert_eq!(true, false);
     }
 }
