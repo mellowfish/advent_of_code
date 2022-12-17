@@ -27,7 +27,7 @@ impl Valve {
     }
 
     fn can_flow(&self) -> bool {
-        self.total_flow > 0
+        self.flow_rate > 0
     }
 
     fn open(&mut self) {
@@ -181,8 +181,10 @@ impl Simulation {
                 return None;
             }
 
-            Some((time_open * valve.flow_rate, valve))
-        }).min_by_key(|(score, _valve)| *score).map(|(_score, valve)| valve.index)
+            let score = time_open * valve.flow_rate;
+            println!("{}: {}", valve.name, score);
+            Some((score, valve))
+        }).max_by_key(|(score, _valve)| *score).map(|(_score, valve)| valve.index)
     }
 
     fn release_max_pressure(&mut self) -> usize {
@@ -217,20 +219,27 @@ impl Simulation {
     }
 
     fn meditate_on_ones_mortality(&mut self) {
+        println!("Meditating on my own mortality");
         while self.ticks_remaining() > 0 {
             self.record_pressure_released();
-            self.end_tick()
+            self.end_tick();
         }
     }
 
     fn travel_to(&mut self, index: usize) {
+        println!("Traveling to {}", self.pipe_system.valves[index].name);
         while self.current_valve_index != index {
-            todo!();
+            self.current_valve_index = self.pipe_system.previous_valves[index][self.current_valve_index];
+            self.record_pressure_released();
+            self.end_tick();
         }
     }
 
     fn open_valve(&mut self) {
-        self.pipe_system.valves[self.current_valve_index].open()
+        println!("Opening valve {}", self.pipe_system.valves[self.current_valve_index].name);
+        self.record_pressure_released();
+        self.pipe_system.valves[self.current_valve_index].open();
+        self.end_tick();
     }
 }
 
