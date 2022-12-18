@@ -128,16 +128,22 @@ struct Chamber {
 
 impl Chamber {
     fn new(input: &str) -> Self {
+        Self::new_with_reversed_rows(input, vec!["+-------+".chars().collect()])
+    }
+
+    fn new_with_reversed_rows(input: &str, rows: Vec<Vec<char>>) -> Self {
         let jets : Vec<Jet> = input.chars().map(|symbol| {
             match symbol {
                 '<' => Jet::Left,
                 '>' => Jet::Right,
-                _ => panic!("Unexpected chartacer: {symbol}")
+                _ => panic!("Unexpected character: {symbol}")
             }
         }).collect();
-        let floor = "+-------+".chars().collect();
 
-        Self { jets, rows: vec![floor] }
+        let mut rows = rows.clone();
+        rows.reverse();
+
+        Self { jets, rows }
     }
 
     fn drop_rocks(&mut self, count: usize) {
@@ -311,6 +317,239 @@ impl Chamber {
 mod tests {
     use std::fs;
     use super::*;
+
+    #[test]
+    fn can_move_with_dash_left_edge() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|@@@@...|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(!chamber.can_move_left(&Shape::dash(), &Point { x: 1, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::dash(), &Point { x: 1, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::dash(), &Point { x: 1, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_dash_middle() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|.####..|".chars().collect(),
+                "|.@@@@..|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::dash(), &Point { x: 2, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::dash(), &Point { x: 2, y: 2 }));
+        assert!(chamber.can_move_down(&Shape::dash(), &Point { x: 2, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_dash_right_edge() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|...@@@@|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::dash(), &Point { x: 4, y: 2 }));
+        assert!(!chamber.can_move_right(&Shape::dash(), &Point { x: 4, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::dash(), &Point { x: 4, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_plus_left_edge() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|.@.....|".chars().collect(),
+                "|@@@....|".chars().collect(),
+                "|#@....#|".chars().collect(),
+                "|...#...|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(!chamber.can_move_left(&Shape::plus(), &Point { x: 1, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::plus(), &Point { x: 1, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::plus(), &Point { x: 1, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_plus_left_middle() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|..@....|".chars().collect(),
+                "|.@@@...|".chars().collect(),
+                "|#.@...#|".chars().collect(),
+                "|...#...|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::plus(), &Point { x: 3, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::plus(), &Point { x: 3, y: 2 }));
+        assert!(chamber.can_move_down(&Shape::plus(), &Point { x: 3, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_plus_middle_top() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|..#@#..|".chars().collect(),
+                "|..@@@..|".chars().collect(),
+                "|#..@..#|".chars().collect(),
+                "|...#...|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(!chamber.can_move_left(&Shape::plus(), &Point { x: 4, y: 2 }));
+        assert!(!chamber.can_move_right(&Shape::plus(), &Point { x: 4, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::plus(), &Point { x: 4, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_plus_middle() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|...@...|".chars().collect(),
+                "|..@@@..|".chars().collect(),
+                "|#..@..#|".chars().collect(),
+                "|...#...|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::plus(), &Point { x: 4, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::plus(), &Point { x: 4, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::plus(), &Point { x: 4, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_plus_right_middle() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|....@..|".chars().collect(),
+                "|...@@@.|".chars().collect(),
+                "|#...@.#|".chars().collect(),
+                "|...#...|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::plus(), &Point { x: 5, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::plus(), &Point { x: 5, y: 2 }));
+        assert!(chamber.can_move_down(&Shape::plus(), &Point { x: 5, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_plus_right_edge() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|.....@.|".chars().collect(),
+                "|....@@@|".chars().collect(),
+                "|#....@#|".chars().collect(),
+                "|...#...|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::plus(), &Point { x: 6, y: 2 }));
+        assert!(!chamber.can_move_right(&Shape::plus(), &Point { x: 6, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::plus(), &Point { x: 6, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_elbow_left_edge() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|..@....|".chars().collect(),
+                "|..@....|".chars().collect(),
+                "|@@@....|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(!chamber.can_move_left(&Shape::elbow(), &Point { x: 1, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::elbow(), &Point { x: 1, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::elbow(), &Point { x: 1, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_elbow_middle() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|...@...|".chars().collect(),
+                "|.#.@...|".chars().collect(),
+                "|.@@@...|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::elbow(), &Point { x: 2, y: 2 }));
+        assert!(chamber.can_move_right(&Shape::elbow(), &Point { x: 2, y: 2 }));
+        assert!(chamber.can_move_down(&Shape::elbow(), &Point { x: 2, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_elbow_middle_top() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|..#@#..|".chars().collect(),
+                "|...@...|".chars().collect(),
+                "|.@@@...|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(!chamber.can_move_left(&Shape::elbow(), &Point { x: 2, y: 2 }));
+        assert!(!chamber.can_move_right(&Shape::elbow(), &Point { x: 2, y: 2 }));
+        assert!(chamber.can_move_down(&Shape::elbow(), &Point { x: 2, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_elbow_middle_joint() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|...@...|".chars().collect(),
+                "|..#@#..|".chars().collect(),
+                "|.@@@...|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(!chamber.can_move_left(&Shape::elbow(), &Point { x: 2, y: 2 }));
+        assert!(!chamber.can_move_right(&Shape::elbow(), &Point { x: 2, y: 2 }));
+        assert!(chamber.can_move_down(&Shape::elbow(), &Point { x: 2, y: 2 }));
+    }
+
+    #[test]
+    fn can_move_with_elbow_right_edge() {
+        let chamber = Chamber::new_with_reversed_rows(
+            ">>>",
+            vec![
+                "|......@|".chars().collect(),
+                "|......@|".chars().collect(),
+                "|....@@@|".chars().collect(),
+                "|#.....#|".chars().collect(),
+                "+-------+".chars().collect()
+            ]
+        );
+        assert!(chamber.can_move_left(&Shape::elbow(), &Point { x: 5, y: 2 }));
+        assert!(!chamber.can_move_right(&Shape::elbow(), &Point { x: 5, y: 2 }));
+        assert!(!chamber.can_move_down(&Shape::elbow(), &Point { x: 5, y: 2 }));
+    }
 
     #[test]
     fn part_one_example() {
