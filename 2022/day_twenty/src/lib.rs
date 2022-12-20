@@ -1,3 +1,57 @@
+use std::borrow::{Borrow, BorrowMut};
+use std::cell::RefCell;
+use std::rc::Rc;
+
+struct LinkedList {
+    head: Option<DoubleEndedNodeLink>
+}
+
+type DoubleEndedNodeLink = Rc<RefCell<DoubleEndedNode>>;
+
+struct DoubleEndedNode {
+    value: i32,
+    next: Option<DoubleEndedNodeLink>,
+    previous: Option<DoubleEndedNodeLink>
+}
+
+impl DoubleEndedNode {
+    fn new(value: i32) -> DoubleEndedNodeLink {
+        Rc::new(RefCell::new(Self { value, next: None, previous: None }))
+    }
+
+    fn new_with_next(value: i32, next: &DoubleEndedNodeLink) -> DoubleEndedNodeLink {
+        Rc::new(RefCell::new( Self { value, next: Some(Rc::clone(next)), previous: None }))
+    }
+
+    fn new_with_previous(value: i32, previous: &DoubleEndedNodeLink) -> DoubleEndedNodeLink {
+        let maybe_next : Option<DoubleEndedNodeLink> = todo!()
+
+        if let Some(next) = previous.borrow().next {
+            Rc::new(RefCell::new( Self { value, next: Some(Rc::clone(&next)), previous: Some(Rc::clone(previous)) }))
+        } else {
+            Rc::new(RefCell::new( Self { value, next: None, previous: Some(Rc::clone(previous)) }))
+        }
+    }
+}
+
+impl LinkedList {
+    fn new() -> Self {
+        Self { head: None }
+    }
+
+    fn append(&mut self, value: i32) {
+        match &mut self.head {
+            None => {
+                self.head = Some(DoubleEndedNode::new(value))
+            },
+            Some(head) => {
+                let new_node = DoubleEndedNode::new_with_previous(value, head);
+                head.()
+            }
+        }
+    }
+}
+
 struct CoordinateFile {
     data: Vec<i32>
 }
@@ -15,30 +69,6 @@ impl CoordinateFile {
         output
     }
 
-    fn rotate_index(&self, index: usize, distance: i32) -> usize {
-        let length = self.data.len() as i32;
-        let mut new_index = index as i32 + distance;
-        if new_index < 0 {
-            while new_index < 0 {
-                new_index += length;
-            }
-        } else if (length - 1) < new_index {
-            while (length - 1) < new_index {
-                new_index -= length;
-            }
-        }
-
-        new_index as usize
-
-        // if new_index < 0 {
-        //     (length + (new_index % length)) as usize
-        // } else if new_index < length {
-        //     new_index as usize
-        // } else {
-        //     ((new_index % length) + 1) as usize
-        // }
-    }
-
     fn decrypt_data(&self) -> Vec<i32> {
         let mut decrypted_data : Vec<i32> = self.data.clone();
 
@@ -54,60 +84,13 @@ impl CoordinateFile {
     }
 
     fn mix_data(&self, number: i32, target_data: &mut Vec<i32>) {
-        let number_index = target_data.iter().position(|value| *value == number).unwrap();
-        let new_number_index = self.rotate_index(number_index, number);
-        dbg!(number, number_index, new_number_index);
-
-        if number_index == new_number_index {
-            return;
-        }
-
-        if number < 0 {
-            if number_index < new_number_index {
-                for index in (number_index + 1)..new_number_index {
-                    target_data[index - 1] = target_data[index];
-                }
-                target_data[new_number_index - 1] = number;
-            } else {
-                if new_number_index == 0 {
-                    let new_number_index = self.data.len() - 1;
-                    for index in (number_index + 1)..=new_number_index {
-                        target_data[index - 1] = target_data[index];
-                    }
-                    target_data[new_number_index] = number;
-                } else {
-                    todo!();
-                }
-            }
-        } else {
-            if number_index < new_number_index {
-                for index in (number_index + 1)..=new_number_index {
-                    target_data[index - 1] = target_data[index];
-                }
-                target_data[new_number_index] = number;
-            } else {
-                for index in ((new_number_index + 1)..=number_index).rev() {
-                    target_data[index] = target_data[index - 1];
-                }
-                target_data[new_number_index] = number;
-            }
-        }
+        todo!();
     }
 
     fn coordinate_sum(&self) -> i32 {
         let decrypted_data = self.decrypt_data();
-        let position_of_zero = decrypted_data.iter().position(|value| *value == 0).unwrap();
 
-        dbg!(self.rotate_index(position_of_zero, 1000));
-        dbg!(self.rotate_index(position_of_zero, 2000));
-        dbg!(self.rotate_index(position_of_zero, 3000));
-        dbg!(decrypted_data[self.rotate_index(position_of_zero, 1000)]);
-        dbg!(decrypted_data[self.rotate_index(position_of_zero, 2000)]);
-        dbg!(decrypted_data[self.rotate_index(position_of_zero, 3000)]);
-
-        decrypted_data[self.rotate_index(position_of_zero, 1000)]
-            + decrypted_data[self.rotate_index(position_of_zero, 2000)]
-            + decrypted_data[self.rotate_index(position_of_zero, 3000)]
+        todo!();
     }
 }
 
