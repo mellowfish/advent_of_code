@@ -1,0 +1,72 @@
+@startuml
+component root [
+root:
+pppw + sjmn
+]
+component pppw [
+pppw:
+cczh / lfqf
+]
+component sjmn [
+sjmn:
+drzm * dbpl
+]
+component dbpl [
+dbpl: 5
+]
+component cczh [
+cczh:
+sllz + lgvd
+]
+component sllz [
+sllz: 4
+]
+component lgvd [
+lgvd:
+ljgn * ptdq
+]
+component ptdq [
+ptdq:
+humn - dvpt
+]
+component humn [ 
+humn: 5 
+]
+
+component dvpt [
+dvpt: 3
+]
+component lfqf [
+lfqf: 4
+]
+component drzm [
+drzm:
+hmdt - zczc
+]
+component zczc [
+zczc: 2
+]
+component hmdt [
+hmdt: 32
+]
+component ljgn [
+ljgn: 2
+]
+
+root --> pppw
+root --> sjmn
+cczh --> sllz
+cczh --> lgvd
+ptdq --> humn
+ptdq --> dvpt
+sjmn --> drzm
+sjmn --> dbpl
+pppw --> cczh
+pppw --> lfqf
+lgvd --> ljgn
+lgvd --> ptdq
+drzm --> hmdt
+drzm --> zczc
+@enduml
+
+((4 + ((h - 3) * 2)) / 4) = ((32 - 2) * 5)
