@@ -49,6 +49,16 @@ impl MonkeyBusiness {
             MonkeyBusiness::Divider { left: _, right: _ } => { MonkeyBusiness::Multiplier { left, right } },
         }
     }
+
+    fn with(&self, left: String, right: String) -> MonkeyBusiness {
+        match self {
+            MonkeyBusiness::Constant { value: _ } => panic!("Tried to split a constant"),
+            MonkeyBusiness::Adder { left: _, right: _ } => { MonkeyBusiness::Adder { left, right } },
+            MonkeyBusiness::Subtracter { left: _, right: _ } => { MonkeyBusiness::Subtracter { left, right } },
+            MonkeyBusiness::Multiplier { left: _, right: _ } => { MonkeyBusiness::Multiplier { left, right } },
+            MonkeyBusiness::Divider { left: _, right: _ } => { MonkeyBusiness::Divider { left, right } },
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -95,15 +105,17 @@ impl Troop {
             let root = self.monkey_definitions.get("root").unwrap();
             let (left_name, right_name) = root.business.unwrap_parts();
             if left_name.eq("humn") {
-                return self.evaluate(left_name);
-            }
-            if right_name.eq("humn") {
                 return self.evaluate(right_name);
             }
+            if right_name.eq("humn") {
+                return self.evaluate(left_name);
+            }
             if self.human_is_under(left_name) {
-                self.shift_right();
+                // println!("Shifting right");
+                self.rotate_right();
             } else {
-                self.shift_left();
+                // println!("Shifting left");
+                self.rotate_left();
             }
         }
     }
@@ -116,88 +128,99 @@ impl Troop {
         self.monkey_definitions.get(name.as_str()).unwrap()
     }
 
-    fn shift_right(&mut self) {
-        let root = self.root();
-        let (left_name, right_name) = root.business.unwrap_parts();
+    fn rotate_right(&mut self) {
+        let (left_name, right_name) = self.root().business.unwrap_parts();
         let left_monkey = self.monkey_named(left_name.clone());
-        let right_monkey = self.monkey_named(right_name.clone());
 
-        match left_monkey.business.clone() {
-            MonkeyBusiness::Adder { left: left_left_name, right: left_right_name } => {
-                if self.human_is_under(left_left_name.clone()) {
-                    self.redefine_monkey(
-                        Monkey {
-                            name: left_name.clone(),
-                            business: left_monkey.business.invert(right_name.clone(), left_right_name.clone()),
-                            value: None
-                        }
-                    );
-
-                    self.redefine_monkey(
-                        Monkey {
-                            name: String::from("root"),
-                            business: MonkeyBusiness::Adder { left: left_left_name.clone(), right: left_name.clone() },
-                            value: None
-                        }
-                    );
-                } else {
-                    self.redefine_monkey(
-                        Monkey {
-                            name: left_name.clone(),
-                            business: left_monkey.business.invert(right_name.clone(), left_left_name.clone()),
-                            value: None
-                        }
-                    );
-
-                    self.redefine_monkey(
-                        Monkey {
-                            name: String::from("root"),
-                            business: MonkeyBusiness::Adder { left: left_right_name.clone(), right: left_name.clone() },
-                            value: None
-                        }
-                    );
-                }
-            },
-            MonkeyBusiness::Subtracter { left: left_left_name, right: left_right_name } => {
-                if self.human_is_under(left_left_name.clone()) {
-                    self.redefine_monkey(
-                        Monkey {
-                            name: left_name.clone(),
-                            business: left_monkey.business.invert(right_name.clone(), left_right_name.clone()),
-                            value: None
-                        }
-                    );
-
-                    self.redefine_monkey(
-                        Monkey {
-                            name: String::from("root"),
-                            business: MonkeyBusiness::Adder { left: left_left_name.clone(), right: left_name.clone() },
-                            value: None
-                        }
-                    );
-                } else {
-                    self.redefine_monkey(
-                        Monkey {
-                            name: left_name.clone(),
-                            business: left_monkey.business.invert(right_name.clone(), left_left_name.clone()),
-                            value: None
-                        }
-                    );
-
-                    self.redefine_monkey(
-                        Monkey {
-                            name: String::from("root"),
-                            business: MonkeyBusiness::Adder { left: left_right_name.clone(), right: left_name.clone() },
-                            value: None
-                        }
-                    );
-                }
-            },
-            _ => todo!()
-        }
+        self.rotate(left_monkey.business.clone(), left_name.clone(), right_name.clone());
     }
 
-    fn shift_left(&mut self) {}
+    fn rotate_left(&mut self) {
+        let (left_name, right_name) = self.root().business.unwrap_parts();
+        let right_monkey = self.monkey_named(right_name.clone());
+
+        self.rotate(right_monkey.business.clone(), right_name.clone(), left_name.clone());
+    }
+
+    fn rotate(&mut self, from_business: MonkeyBusiness, from_name: String, to_name: String) {
+        match from_business.clone() {
+            MonkeyBusiness::Adder { left: left_left_name, right: left_right_name }
+                | MonkeyBusiness::Multiplier { left: left_left_name, right: left_right_name }
+                    => {
+                        if self.human_is_under(left_left_name.clone()) {
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: from_name.clone(),
+                                    business: from_business.invert(to_name.clone(), left_right_name.clone()),
+                                    value: None
+                                }
+                            );
+
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: String::from("root"),
+                                    business: MonkeyBusiness::Adder { left: left_left_name.clone(), right: from_name.clone() },
+                                    value: None
+                                }
+                            );
+                        } else {
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: from_name.clone(),
+                                    business: from_business.invert(to_name.clone(), left_left_name.clone()),
+                                    value: None
+                                }
+                            );
+
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: String::from("root"),
+                                    business: MonkeyBusiness::Adder { left: left_right_name.clone(), right: from_name.clone() },
+                                    value: None
+                                }
+                            );
+                        }
+                    },
+            MonkeyBusiness::Subtracter { left: left_left_name, right: left_right_name }
+                | MonkeyBusiness::Divider { left: left_left_name, right: left_right_name }
+                    => {
+                        if self.human_is_under(left_left_name.clone()) {
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: from_name.clone(),
+                                    business: from_business.invert(to_name.clone(), left_right_name.clone()),
+                                    value: None
+                                }
+                            );
+
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: String::from("root"),
+                                    business: MonkeyBusiness::Adder { left: left_left_name.clone(), right: from_name.clone() },
+                                    value: None
+                                }
+                            );
+                        } else {
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: from_name.clone(),
+                                    business: from_business.with(left_left_name.clone(), to_name.clone()),
+                                    value: None
+                                }
+                            );
+
+                            self.redefine_monkey(
+                                Monkey {
+                                    name: String::from("root"),
+                                    business: MonkeyBusiness::Adder { left: left_right_name.clone(), right: from_name.clone() },
+                                    value: None
+                                }
+                            );
+                        }
+                    }
+            _ => panic!("Unexpected constant operation {}", from_name)
+        }
+    }
 
     fn redefine_monkey(&mut self, new_monkey: Monkey) {
         self.monkey_definitions.insert(new_monkey.name.clone(), new_monkey);
@@ -260,5 +283,11 @@ mod tests {
     fn part_two_example() {
         let mut troop = Troop::new(fs::read_to_string("example_input.txt").unwrap().as_str());
         assert_eq!(troop.part_two_value(), 301);
+    }
+
+    #[test]
+    fn part_two() {
+        let mut troop = Troop::new(fs::read_to_string("input.txt").unwrap().as_str());
+        assert_eq!(troop.part_two_value(), 3_509_819_803_065);
     }
 }
