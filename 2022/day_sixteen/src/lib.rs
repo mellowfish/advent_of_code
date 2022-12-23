@@ -1,5 +1,31 @@
 use std::collections::HashMap;
 
+// from: https://stackoverflow.com/a/59939809/814835
+fn permutations_of<T: Clone>(items: Vec<T>) -> Vec<Vec<T>>
+where
+    T: Ord
+{
+    if items.len() == 1 {
+        return vec![items.clone()];
+    }
+
+    let mut permutations = vec![];
+    let items_copy = items.clone();
+
+    for item in items_copy {
+        let mut remaining_items = items.clone();
+        let index = remaining_items.iter().position(|x| *x == item).unwrap();
+        remaining_items.remove(index);
+
+        for mut permutation in permutations_of(remaining_items) {
+            permutation.insert(0, item.clone());
+            permutations.push(permutation);
+        }
+    }
+
+    permutations
+}
+
 #[derive(Clone)]
 struct Valve {
     index: usize,
@@ -35,6 +61,7 @@ impl Valve {
     }
 }
 
+#[derive(Clone)]
 struct PipeSystem {
     valves: Vec<Valve>,
     named_valve_indices: HashMap<String, usize>,
@@ -123,6 +150,10 @@ impl PipeSystem {
         self.distance_from(self.index_for_name(from), self.index_for_name(to))
     }
 
+    fn all_possible_valve_open_orderings(&self) -> Vec<Vec<usize>> {
+        permutations_of(self.flowable_valve_indices.clone())
+    }
+
     #[allow(dead_code)]
     fn print_distances(&self) {
         // HEADER
@@ -145,6 +176,7 @@ impl PipeSystem {
 
 struct Simulation {
     pipe_system: PipeSystem,
+    valve_open_stack: Vec<usize>,
     tick: usize,
     current_valve_index: usize,
     target_valve_index: usize,
@@ -152,14 +184,39 @@ struct Simulation {
 }
 
 impl Simulation {
-    fn new(pipe_system: PipeSystem) -> Self {
+    fn new(pipe_system: PipeSystem, valve_open_ordering: Vec<usize>) -> Self {
+        let mut valve_open_stack = valve_open_ordering.clone();
+        valve_open_stack.reverse();
+
         Self {
             pipe_system,
+            valve_open_stack,
             tick: 0,
             current_valve_index: 0,
             target_valve_index: 0,
             total_pressure_released: 0
         }
+    }
+
+    fn optimize_for_pressure_release(pipe_system: &PipeSystem) -> (Vec<usize>, usize) {
+        let mut best_case = 0;
+        let mut best_case_ordering : Option<&Vec<usize>> = None;
+        let possible_valve_open_orderings = pipe_system.all_possible_valve_open_orderings();
+        println!("{} possible orderings", possible_valve_open_orderings.len());
+
+        for valve_open_ordering in possible_valve_open_orderings.iter() {
+            let max_pressure = Simulation::new(pipe_system.clone(), valve_open_ordering.clone()).release_max_pressure();
+            if max_pressure > best_case {
+                best_case = max_pressure;
+                best_case_ordering = Some(valve_open_ordering);
+            }
+        }
+
+        if best_case_ordering.is_none() {
+            panic!("No solution found");
+        }
+
+        (best_case_ordering.unwrap().to_owned(), best_case)
     }
 
     fn ticks_remaining(&self) -> usize {
@@ -170,22 +227,22 @@ impl Simulation {
         self.tick += 1
     }
 
-    fn next_target(&self) -> Option<usize> {
-        self.pipe_system.flowable_valve_indices.iter().filter_map(|&index| {
-            let valve = &self.pipe_system.valves[index];
-            if valve.is_open {
-                return None;
-            }
-            let time_open = self.ticks_remaining() - (self.pipe_system.distance_from(self.current_valve_index, index) + 1);
-            if time_open < 1 {
-                return None;
-            }
-
-            let score = time_open * valve.flow_rate;
-            println!("{}: {}", valve.name, score);
-            Some((score, valve))
-        }).max_by_key(|(score, _valve)| *score).map(|(_score, valve)| valve.index)
-    }
+    // fn next_target(&self) -> Option<usize> {
+    //     self.pipe_system.flowable_valve_indices.iter().filter_map(|&index| {
+    //         let valve = &self.pipe_system.valves[index];
+    //         if valve.is_open {
+    //             return None;
+    //         }
+    //         let time_open = self.ticks_remaining() - (self.pipe_system.distance_from(self.current_valve_index, index) + 1);
+    //         if time_open < 1 {
+    //             return None;
+    //         }
+    //
+    //         let score = time_open * valve.flow_rate;
+    //         println!("{}: {}", valve.name, score);
+    //         Some((score, valve))
+    //     }).max_by_key(|(score, _valve)| *score).map(|(_score, valve)| valve.index)
+    // }
 
     fn release_max_pressure(&mut self) -> usize {
         while self.ticks_remaining() > 0 {
@@ -204,6 +261,10 @@ impl Simulation {
         self.total_pressure_released
     }
 
+    fn next_target(&mut self) -> Option<usize> {
+        self.valve_open_stack.pop()
+    }
+
     fn pressure_released(&self) -> usize {
         self.pipe_system.valves.iter().filter_map(|valve| {
             if valve.is_open {
@@ -219,7 +280,7 @@ impl Simulation {
     }
 
     fn meditate_on_ones_mortality(&mut self) {
-        println!("Meditating on my own mortality");
+        // println!("Meditating on my own mortality");
         while self.ticks_remaining() > 0 {
             self.record_pressure_released();
             self.end_tick();
@@ -227,7 +288,7 @@ impl Simulation {
     }
 
     fn travel_to(&mut self, index: usize) {
-        println!("Traveling to {}", self.pipe_system.valves[index].name);
+        // println!("Traveling to {}", self.pipe_system.valves[index].name);
         while self.current_valve_index != index {
             self.current_valve_index = self.pipe_system.previous_valves[index][self.current_valve_index];
             self.record_pressure_released();
@@ -236,7 +297,7 @@ impl Simulation {
     }
 
     fn open_valve(&mut self) {
-        println!("Opening valve {}", self.pipe_system.valves[self.current_valve_index].name);
+        // println!("Opening valve {}", self.pipe_system.valves[self.current_valve_index].name);
         self.record_pressure_released();
         self.pipe_system.valves[self.current_valve_index].open();
         self.end_tick();
@@ -251,7 +312,12 @@ mod tests {
     #[test]
     fn part_one_example() {
         let pipe_system = PipeSystem::new(fs::read_to_string("example_input.txt").unwrap().as_str());
-        let mut simulation = Simulation::new(pipe_system);
-        assert_eq!(simulation.release_max_pressure(), 1651);
+        assert_eq!(Simulation::optimize_for_pressure_release(&pipe_system).1, 1651);
+    }
+
+    #[test]
+    fn part_one() {
+        let pipe_system = PipeSystem::new(fs::read_to_string("input.txt").unwrap().as_str());
+        assert_eq!(Simulation::optimize_for_pressure_release(&pipe_system).1, 1651);
     }
 }
