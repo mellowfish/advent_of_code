@@ -1,0 +1,11 @@
+en:
+  solution:
+    preamble: |
+      // Preamble code (edit me in en.yml)
+      var debug = function(text) {
+        debugOutput += text + '\n';
+      };
+      var solve = function(input) {
+    epilogue: |
+      };
+      // Epilogue code (edit me in en.yml)

@@ -1,0 +1,31 @@
+.IDE {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+
+  &-editor, &-examples {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  &-examples {
+    overflow-y: scroll;
+  }
+
+  &-example {
+    .IDE-exampleResults {
+      display: none;
+    }
+
+    &--success { background-color: #BBFFBB; }
+    &--failure { background-color: #FFBBBB; }
+    &--selected {
+      background-color: #BBFFFF;
+
+      .IDE-exampleResults {
+        display: block;
+      }
+    }
+  }
+}

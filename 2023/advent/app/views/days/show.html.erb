@@ -1,0 +1,72 @@
+<h1><%= day.title %></h1>
+<ul>
+  <li><%= link_to("Official Page", "https://adventofcode.com/2023/day/#{day.id}") %></li>
+  <li><%= link_to("Edit", edit_day_path(day)) %></li>
+</ul>
+<%=
+  content_tag(
+    :div,
+    class: "IDE",
+    data: {
+      controller: "editor",
+      editor_day_url_value: day_url(day),
+      editor_examples_url_value: day_examples_url(day_id: day.id),
+      editor_example_url_value: day_example_url(day_id: day.id, id: "A113")
+    }
+  ) do
+%>
+  <div class="IDE-editor">
+    <textarea cols="80" rows="<%= preamble.lines.size %>" disabled data-editor-target="preamble"><%= preamble %></textarea>
+    <textarea cols="80" rows="20" data-editor-target="solution"><%= day.solution %></textarea>
+    <textarea cols="80" rows="<%= epilogue.lines.size %>" disabled data-editor-target="epilogue"><%= epilogue %></textarea>
+    <br>
+    <div>
+      <button data-action="click->editor#update">Save</button>
+    </div>
+  </div>
+  <div class="IDE-examples" data-editor-target="examples">
+    <% if day.examples.blank? %>
+      <h2>Add your first test...</h2>
+    <% end %>
+    <% day.examples.each_with_index do |example, index| %>
+      <div class="IDE-example" data-example-id="<%= example.id %>" data-selected="<%= index.zero? %>" data-action="click->editor#selectTest">
+        <label for="test-<%= example.id %>-input">Input</label><br>
+        <textarea id="test-<%= example.id %>-input" cols="80" rows="5"><%= example.input %></textarea><br>
+        <label for="test-<%= example.id %>-expected-output">Expected Output</label><br>
+        <textarea id="test-<%= example.id %>-expected-output" cols="80"><%= example.expected_output %></textarea><br>
+        <button data-action="click->editor#runTest">Run</button>
+        <button data-action="click->editor#saveTest">Persist</button>
+        <button data-action="click->editor#deleteTest">Delete</button>
+        <div class="IDE-exampleResults">
+          <br><br>
+          <label for="test-<%= example.id %>-actual-output">Actual Output</label><br>
+          <textarea id="test-<%= example.id %>-actual-output" cols="80"></textarea><br>
+          <br>
+          <label for="test-<%= example.id %>-debug">Debug</label><br>
+          <textarea id="test-<%= example.id %>-debug" name="debug" cols="80" rows="5" disabled></textarea>
+        </div>
+      </div>
+      <br><br>
+    <% end %>
+    <% if day.examples.present? %>
+      <h2>Add another test...</h2>
+    <% end %>
+    <hr>
+    <div class="IDE-example" data-example-id="new" data-action="click->editor#selectTest">
+      <label for="test-new-input">Input</label><br>
+      <textarea id="test-new-input" cols="80" rows="5"></textarea><br>
+      <label for="test-new-expected-output">Expected Output</label><br>
+      <textarea id="test-new-expected-output" cols="80"></textarea><br>
+      <button data-action="click->editor#runTest">Run</button>
+      <button data-action="click->editor#saveTest">Persist</button>
+      <div class="IDE-exampleResults">
+        <br><br>
+        <label for="test-new-actual-output">Actual Output</label><br>
+        <textarea id="test-new-actual-output" cols="80"></textarea><br>
+        <br>
+        <label for="test-new-debug">Debug</label><br>
+        <textarea id="test-new-debug" name="debug" cols="80" rows="5" disabled></textarea>
+      </div>
+    </div>
+  </div>
+<% end %>
