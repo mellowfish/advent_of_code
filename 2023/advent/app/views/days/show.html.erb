@@ -17,7 +17,8 @@
 %>
   <div class="IDE-editor">
     <textarea cols="80" rows="<%= preamble.lines.size %>" disabled data-editor-target="preamble"><%= preamble %></textarea>
-    <textarea cols="80" rows="20" data-editor-target="solution"><%= day.solution %></textarea>
+    <textarea cols="80" rows="20" data-editor-target="solutionPartOne"><%= day.solution_part_one %></textarea>
+    <textarea cols="80" rows="20" data-editor-target="solutionPartTwo"><%= day.solution_part_two %></textarea>
     <textarea cols="80" rows="<%= epilogue.lines.size %>" disabled data-editor-target="epilogue"><%= epilogue %></textarea>
     <br>
     <div>
@@ -30,6 +31,9 @@
     <% end %>
     <% day.examples.each_with_index do |example, index| %>
       <div class="IDE-example" data-example-id="<%= example.id %>" data-selected="<%= index.zero? %>" data-action="click->editor#selectTest">
+        <%= label_tag("example[part]", "Part") %>
+        <%= select_tag("example[part]", options_for_select(%w[one two], example.part)) %>
+        <br>
         <label for="test-<%= example.id %>-input">Input</label><br>
         <textarea id="test-<%= example.id %>-input" cols="80" rows="5"><%= example.input %></textarea><br>
         <label for="test-<%= example.id %>-expected-output">Expected Output</label><br>
@@ -53,6 +57,9 @@
     <% end %>
     <hr>
     <div class="IDE-example" data-example-id="new" data-action="click->editor#selectTest">
+      <%= label_tag("example[part]", "Part") %>
+      <%= select_tag("example[part]", options_for_select(%w[one two])) %>
+      <br>
       <label for="test-new-input">Input</label><br>
       <textarea id="test-new-input" cols="80" rows="5"></textarea><br>
       <label for="test-new-expected-output">Expected Output</label><br>

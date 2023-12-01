@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ['solution', 'preamble', 'epilogue'];
+  static targets = ['solutionPartOne', 'solutionPartTwo', 'preamble', 'epilogue'];
   static values = {
     dayUrl: String,
     examplesUrl: String,
@@ -10,26 +10,27 @@ export default class extends Controller {
 
   connect() {
     this.csrfToken = document.querySelector("[name='csrf-token']").content;
-    this.solution = this.solutionTarget.value;
+    this.solutionPartOne = this.solutionPartOneTarget.value;
+    this.solutionPartTwo = this.solutionPartTwoTarget.value;
     this.preamble = this.preambleTarget.value;
     this.epilogue = this.epilogueTarget.value;
-
-    setTimeout(this.runCode.bind(this), 100);
   }
 
   async update() {
-    const oldSolution = this.solution
-    this.solution = this.solutionTarget.value;
-    if(this.solution === oldSolution) {
+    const oldSolutionPartOne = this.solutionPartOne;
+    const oldSolutionPartTwo = this.solutionPartTwo;
+    this.solutionPartOne = this.solutionPartOneTarget.value;
+    this.solutionPartTwo = this.solutionPartTwoTarget.value;
+    if(this.solutionPartOne === oldSolutionPartOne && this.solutionPartTwo === oldSolutionPartTwo) {
       return;
     }
-    this.runCode();
     await this.save();
   }
 
   async save() {
     let formData = new FormData();
-    formData.append("day[solution]", this.solution);
+    formData.append("day[solution_part_one]", this.solutionPartOne);
+    formData.append("day[solution_part_two]", this.solutionPartTwo);
     await fetch(
       this.dayUrlValue,
         {
@@ -40,17 +41,18 @@ export default class extends Controller {
       );
   }
 
-  runCode() {
-    eval(this.preamble + this.solution + this.epilogue);
-  }
-
   runTest(event) {
     const exampleNode = event.target.parentNode;
     const exampleId = exampleNode.dataset.exampleId;
+    const part = exampleNode.querySelector('select[name="example[part]"]').value;
     const input = exampleNode.querySelector(`#test-${exampleId}-input`).value;
-    var output = '';
-    var debugOutput = '';
-    eval(this.preamble + this.solution + this.epilogue + '\noutput = solve(input);\n');
+    let output = '';
+    let debugOutput = '';
+    if(part === 'one') {
+      eval(this.preamble + this.solutionPartOne + this.epilogue + '\noutput = solve(input);\n');
+    } else if (part === 'two') {
+      eval(this.preamble + this.solutionPartTwo + this.epilogue + '\noutput = solve(input);\n');
+    }
     const expectedOutput = exampleNode.querySelector(`#test-${exampleId}-expected-output`).value;
     exampleNode.querySelector(`#test-${exampleId}-actual-output`).value = output;
     exampleNode.querySelector(`#test-${exampleId}-debug`).value = debugOutput;
@@ -70,12 +72,15 @@ export default class extends Controller {
     const exampleNode = event.target.parentNode;
     const exampleId = exampleNode.dataset.exampleId;
     const input = exampleNode.querySelector(`#test-${exampleId}-input`).value;
+    const part = exampleNode.querySelector('select[name="example[part]"]').value;
+    console.log(part);
     const expectedOutput = exampleNode.querySelector(`#test-${exampleId}-expected-output`).value;
 
     if(exampleId === 'new') {
       let formData = new FormData();
-      formData.append("example[input]", input);
-      formData.append("example[expected_output]", expectedOutput);
+      formData.append('example[input]', input);
+      formData.append('example[expected_output]', expectedOutput);
+      formData.append('example[part]', part);
       await fetch(
         this.examplesUrlValue,
         {
@@ -89,6 +94,7 @@ export default class extends Controller {
       let formData = new FormData();
       formData.append("example[input]", input);
       formData.append("example[expected_output]", expectedOutput);
+      formData.append('example[part]', part);
       await fetch(
         this.exampleUrlValue.replace("A113", exampleId),
         {

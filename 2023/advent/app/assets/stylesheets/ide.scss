@@ -22,7 +22,9 @@
     &--failure { background-color: #FFBBBB; }
     &--selected {
       background-color: #BBFFFF;
+    }
 
+    &--success, &--failure, &--selected {
       .IDE-exampleResults {
         display: block;
       }

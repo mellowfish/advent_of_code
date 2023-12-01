@@ -43,6 +43,6 @@ class ExamplesController < ApplicationController
   def example_params
     return {} unless params.key?(:example)
 
-    params.require(:example).permit(:input, :expected_output).to_h.symbolize_keys
+    params.require(:example).permit(:input, :expected_output, :part).to_h.symbolize_keys
   end
 end

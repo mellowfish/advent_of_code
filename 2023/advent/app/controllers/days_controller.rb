@@ -51,7 +51,7 @@ class DaysController < ApplicationController
 
     params
       .require(:day)
-      .permit(:title, :description, :solution)
+      .permit(:title, :description, :solution_part_one, :solution_part_two)
       .to_h
       .symbolize_keys
   end

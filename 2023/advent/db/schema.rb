@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_30_032139) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_01_212959) do
   create_table "days", force: :cascade do |t|
     t.string "title"
     t.text "description"
-    t.text "solution"
+    t.text "solution_part_one"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "solution_part_two"
   end
 
   create_table "examples", force: :cascade do |t|
@@ -25,6 +26,7 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_30_032139) do
     t.text "expected_output"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "part"
     t.index ["day_id"], name: "index_examples_on_day_id"
   end
 
