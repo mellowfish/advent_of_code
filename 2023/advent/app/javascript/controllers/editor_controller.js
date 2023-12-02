@@ -49,9 +49,9 @@ export default class extends Controller {
     let output = '';
     let debugOutput = '';
     if(part === 'one') {
-      eval(this.preamble + this.solutionPartOne + this.epilogue + '\noutput = solve(input);\n');
+      eval(this.preamble + this.solutionPartOne + this.epilogue + '\noutput = `${solve(input)}`;\n');
     } else if (part === 'two') {
-      eval(this.preamble + this.solutionPartTwo + this.epilogue + '\noutput = solve(input);\n');
+      eval(this.preamble + this.solutionPartTwo + this.epilogue + '\noutput = `${solve(input)}`;\n');
     }
     const expectedOutput = exampleNode.querySelector(`#test-${exampleId}-expected-output`).value;
     exampleNode.querySelector(`#test-${exampleId}-actual-output`).value = output;
