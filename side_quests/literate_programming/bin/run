@@ -1,0 +1,8 @@
+#! /usr/bin/env ruby
+
+require "English"
+require_relative "../lib/literate"
+
+program = Literate.parse($ARGV.first)
+
+p program
