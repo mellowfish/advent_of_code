@@ -7,7 +7,36 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
 class DayFiveTest {
-    static final String SAMPLE_INPUT = """
+    static final String SAMPLE_INPUT =
+            """
+            47|53
+            97|13
+            97|61
+            97|47
+            75|29
+            61|13
+            75|53
+            29|13
+            97|29
+            53|29
+            61|53
+            97|53
+            61|29
+            47|13
+            75|47
+            97|75
+            47|61
+            75|61
+            47|29
+            75|13
+            53|13
+
+            75,47,61,53,29
+            97,61,53,29,13
+            75,29,13
+            75,97,47,61,53
+            61,13,29
+            97,13,75,29,47
             """;
 
     String fullInput() throws Exception {
@@ -16,21 +45,21 @@ class DayFiveTest {
 
     @Test
     void testPartOneExample() {
-        assertEquals(41, DayFive.with(SAMPLE_INPUT).partOne());
+        assertEquals(143, DayFive.with(SAMPLE_INPUT).partOne());
     }
 
     @Test
     void testPartOneFullInput() throws Exception {
-        assertEquals(41, DayFive.with(fullInput()).partOne());
+        assertEquals(6951, DayFive.with(fullInput()).partOne());
     }
 
     @Test
     void testPartTwoExample() {
-        assertEquals(42, DayFive.with(SAMPLE_INPUT).partTwo());
+        assertEquals(123, DayFive.with(SAMPLE_INPUT).partTwo());
     }
 
     @Test
     void testPartTwoWithFullInput() throws Exception {
-        assertEquals(42, DayFive.with(fullInput()).partTwo());
+        assertEquals(4121, DayFive.with(fullInput()).partTwo());
     }
 }
