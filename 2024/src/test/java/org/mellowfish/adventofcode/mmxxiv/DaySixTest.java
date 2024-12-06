@@ -7,7 +7,18 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Test;
 
 class DaySixTest {
-    static final String SAMPLE_INPUT = """
+    static final String SAMPLE_INPUT =
+            """
+            ....#.....
+            .........#
+            ..........
+            ..#.......
+            .......#..
+            ..........
+            .#..^.....
+            ........#.
+            #.........
+            ......#...
             """;
 
     String fullInput() throws Exception {
@@ -21,16 +32,16 @@ class DaySixTest {
 
     @Test
     void testPartOneFullInput() throws Exception {
-        assertEquals(41, DaySix.with(fullInput()).partOne());
+        assertEquals(4988, DaySix.with(fullInput()).partOne());
     }
 
     @Test
     void testPartTwoExample() {
-        assertEquals(42, DaySix.with(SAMPLE_INPUT).partTwo());
+        assertEquals(6, DaySix.with(SAMPLE_INPUT).partTwo());
     }
 
     @Test
     void testPartTwoWithFullInput() throws Exception {
-        assertEquals(42, DaySix.with(fullInput()).partTwo());
+        assertEquals(1697, DaySix.with(fullInput()).partTwo());
     }
 }
