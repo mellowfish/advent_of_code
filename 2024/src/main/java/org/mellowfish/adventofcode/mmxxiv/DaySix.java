@@ -4,138 +4,138 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.mellowfish.adventofcode.mmxxiv.shared.Point;
 
-enum Direction {
-    NORTH('^'),
-    EAST('>'),
-    SOUTH('v'),
-    WEST('<');
-
-    final char value;
-
-    Direction(char value) {
-        this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    public Point move(Point location) {
-        return switch (this) {
-            case NORTH -> new Point(location.x(), location.y() - 1);
-            case EAST -> new Point(location.x() + 1, location.y());
-            case SOUTH -> new Point(location.x(), location.y() + 1);
-            case WEST -> new Point(location.x() - 1, location.y());
-        };
-    }
-
-    public Direction pivotRight() {
-        return switch (this) {
-            case NORTH -> EAST;
-            case EAST -> SOUTH;
-            case SOUTH -> WEST;
-            case WEST -> NORTH;
-        };
-    }
-}
-
-record Guard(Point location, Direction direction) {
-    public Point nextStep() {
-        return direction.move(location);
-    }
-
-    public Guard pivotRight() {
-        return new Guard(location, direction.pivotRight());
-    }
-
-    public Guard goForward() {
-        return new Guard(nextStep(), direction);
-    }
-}
-
-class Simulation {
-    private final int width;
-    private final int height;
-    private final List<Point> obstacles;
-    private final HashMap<Point, ArrayList<Direction>> visitedLocations;
-    private Guard guard;
-
-    Simulation(int width, int height, List<Point> obstacles, Guard guard) {
-        this.width = width;
-        this.height = height;
-        this.obstacles = obstacles;
-        this.guard = guard;
-
-        this.visitedLocations = new HashMap<>();
-    }
-
-    public Simulation(Simulation simulation) {
-        this(simulation.width, simulation.height, simulation.obstacles, simulation.guard);
-    }
-
-    public Map<Point, ArrayList<Direction>> run() {
-        while (guardIsOnMap()) {
-            move();
-        }
-        return visitedLocations;
-    }
-
-    public Point getGuardLocation() {
-        return guard.location();
-    }
-
-    public Simulation withObstacle(Point point) {
-        ArrayList<Point> newObstacles = new ArrayList<>(obstacles);
-        newObstacles.add(point);
-        return new Simulation(width, height, newObstacles, guard);
-    }
-
-    boolean guardIsOnMap() {
-        return this.guard.location().x() >= 0
-                && this.guard.location().x() < width
-                && this.guard.location().y() >= 0
-                && this.guard.location().y() < height;
-    }
-
-    void move() {
-        ArrayList<Direction> previousVisits =
-                visitedLocations.computeIfAbsent(guard.location(), k -> new ArrayList<>());
-        if (previousVisits.contains(guard.direction())) {
-            throw new RuntimeException("Loop detected!");
-        }
-        previousVisits.add(guard.direction());
-
-        Point nextStep = this.guard.nextStep();
-        if (obstacles.contains(nextStep)) {
-            this.guard = this.guard.pivotRight();
-        } else {
-            this.guard = this.guard.goForward();
-        }
-    }
-
-    void print() {
-        System.out.println();
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                Point point = new Point(x, y);
-                if (guard.location().equals(point)) {
-                    System.out.print(guard.direction());
-                } else if (obstacles.contains(point)) {
-                    System.out.print("#");
-                } else if (visitedLocations.containsKey(point)) {
-                    System.out.print("X");
-                } else {
-                    System.out.print(".");
-                }
-            }
-            System.out.println();
-        }
-    }
-}
-
 // Possible optimization: fork simulations instead of completely re-running them!
 public class DaySix {
+    enum Direction {
+        NORTH('^'),
+        EAST('>'),
+        SOUTH('v'),
+        WEST('<');
+
+        final char value;
+
+        Direction(char value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+
+        public Point move(Point location) {
+            return switch (this) {
+                case NORTH -> new Point(location.x(), location.y() - 1);
+                case EAST -> new Point(location.x() + 1, location.y());
+                case SOUTH -> new Point(location.x(), location.y() + 1);
+                case WEST -> new Point(location.x() - 1, location.y());
+            };
+        }
+
+        public Direction pivotRight() {
+            return switch (this) {
+                case NORTH -> EAST;
+                case EAST -> SOUTH;
+                case SOUTH -> WEST;
+                case WEST -> NORTH;
+            };
+        }
+    }
+
+    record Guard(Point location, Direction direction) {
+        public Point nextStep() {
+            return direction.move(location);
+        }
+
+        public Guard pivotRight() {
+            return new Guard(location, direction.pivotRight());
+        }
+
+        public Guard goForward() {
+            return new Guard(nextStep(), direction);
+        }
+    }
+
+    class Simulation {
+        private final int width;
+        private final int height;
+        private final List<Point> obstacles;
+        private final HashMap<Point, ArrayList<Direction>> visitedLocations;
+        private Guard guard;
+
+        Simulation(int width, int height, List<Point> obstacles, Guard guard) {
+            this.width = width;
+            this.height = height;
+            this.obstacles = obstacles;
+            this.guard = guard;
+
+            this.visitedLocations = new HashMap<>();
+        }
+
+        public Simulation(Simulation simulation) {
+            this(simulation.width, simulation.height, simulation.obstacles, simulation.guard);
+        }
+
+        public Map<Point, ArrayList<Direction>> run() {
+            while (guardIsOnMap()) {
+                move();
+            }
+            return visitedLocations;
+        }
+
+        public Point getGuardLocation() {
+            return guard.location();
+        }
+
+        public Simulation withObstacle(Point point) {
+            ArrayList<Point> newObstacles = new ArrayList<>(obstacles);
+            newObstacles.add(point);
+            return new Simulation(width, height, newObstacles, guard);
+        }
+
+        boolean guardIsOnMap() {
+            return this.guard.location().x() >= 0
+                    && this.guard.location().x() < width
+                    && this.guard.location().y() >= 0
+                    && this.guard.location().y() < height;
+        }
+
+        void move() {
+            ArrayList<Direction> previousVisits =
+                    visitedLocations.computeIfAbsent(guard.location(), k -> new ArrayList<>());
+            if (previousVisits.contains(guard.direction())) {
+                throw new RuntimeException("Loop detected!");
+            }
+            previousVisits.add(guard.direction());
+
+            Point nextStep = this.guard.nextStep();
+            if (obstacles.contains(nextStep)) {
+                this.guard = this.guard.pivotRight();
+            } else {
+                this.guard = this.guard.goForward();
+            }
+        }
+
+        void print() {
+            System.out.println();
+            for (int y = 0; y < height; y++) {
+                for (int x = 0; x < width; x++) {
+                    Point point = new Point(x, y);
+                    if (guard.location().equals(point)) {
+                        System.out.print(guard.direction());
+                    } else if (obstacles.contains(point)) {
+                        System.out.print("#");
+                    } else if (visitedLocations.containsKey(point)) {
+                        System.out.print("X");
+                    } else {
+                        System.out.print(".");
+                    }
+                }
+                System.out.println();
+            }
+        }
+    }
+
     private final Simulation simulation;
 
     public static DaySix with(String input) {
