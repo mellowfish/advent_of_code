@@ -20,6 +20,7 @@ class DayNineTest {
         assertEquals(1928, DayNine.with(SAMPLE_INPUT).partOne());
     }
 
+    // 1523575464 is too low
     @Test
     void testPartOneFullInput() throws Exception {
         assertEquals(41, DayNine.with(fullInput()).partOne());

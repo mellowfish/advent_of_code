@@ -15,6 +15,9 @@ public class DayNine {
         }
 
         public void writeNewFile(int start, int length) {
+//            if (length == 0) {
+//                return;
+//            }
             for (int i = 0; i < length; i++) {
                 int index = start + i;
                 if (blocks.size() == index) {
@@ -47,9 +50,10 @@ public class DayNine {
             int total = 0;
             for (int i = 0; i < blocks.size(); i++) {
                 Integer fileId = blocks.get(i);
-                if (fileId != null) {
-                    total += i * fileId;
+                if (fileId == null) {
+                    return total;
                 }
+                total += i * fileId;
             }
             return total;
         }
@@ -82,17 +86,25 @@ public class DayNine {
         }
 
         public void print() {
+            int fileBlocks = 0;
+            int clearBlocks = 0;
+            int rows = (blocks.size() / 20) + 1;
+            int maxRowWidth = String.valueOf(rows).length();
             for(int i = 0; i < blocks.size(); i++) {
+                if (i % 20 == 0) {
+                    System.out.println();
+                    System.out.printf("%" + maxRowWidth + "d: ", (i / 20) + 1);
+                }
                 Integer fileId = blocks.get(i);
                 if (fileId == null) {
-                    System.out.print(" ".repeat(fileIdWidth() + 1));
+                    clearBlocks++;
+                    System.out.print("_".repeat(fileIdWidth()) + " ");
                 } else {
-                    System.out.printf("%" + (fileIdWidth() + 1) + "s", fileId);
-                }
-                if (i % 30 == 0) {
-                    System.out.println();
+                    fileBlocks++;
+                    System.out.printf("%" + fileIdWidth() + "s ", fileId);
                 }
             }
+            System.out.printf("%n%d file blocks, %d clear blocks%n", fileBlocks, clearBlocks);
         }
 
         int fileIdWidth() {
