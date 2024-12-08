@@ -2,6 +2,7 @@ package org.mellowfish.adventofcode.mmxxiv;
 
 import java.util.HashMap;
 import java.util.List;
+import org.mellowfish.adventofcode.mmxxiv.shared.Point;
 
 public class DayFour {
     private final String input;
@@ -113,6 +114,4 @@ public class DayFour {
     private Character get(int x, int y) {
         return board.get(new Point(x, y));
     }
-
-    record Point(int x, int y) {}
 }

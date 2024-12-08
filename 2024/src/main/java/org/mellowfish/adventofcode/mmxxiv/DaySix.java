@@ -2,8 +2,7 @@ package org.mellowfish.adventofcode.mmxxiv;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-record Point(int x, int y) {}
+import org.mellowfish.adventofcode.mmxxiv.shared.Point;
 
 enum Direction {
     NORTH('^'),
