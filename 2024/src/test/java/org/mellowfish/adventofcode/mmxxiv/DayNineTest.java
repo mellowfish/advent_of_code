@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 
 class DayNineTest {
     static final String SAMPLE_INPUT = """
+            2333133121414131402
             """;
 
     String fullInput() throws Exception {
@@ -16,7 +17,7 @@ class DayNineTest {
 
     @Test
     void testPartOneExample() {
-        assertEquals(41, DayNine.with(SAMPLE_INPUT).partOne());
+        assertEquals(1928, DayNine.with(SAMPLE_INPUT).partOne());
     }
 
     @Test
