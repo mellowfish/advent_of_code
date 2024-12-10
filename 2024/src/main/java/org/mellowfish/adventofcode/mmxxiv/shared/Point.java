@@ -2,6 +2,8 @@ package org.mellowfish.adventofcode.mmxxiv.shared;
 
 import static org.mellowfish.adventofcode.mmxxiv.shared.Utilities.gcd;
 
+import java.util.List;
+
 public record Point(int x, int y) {
     public boolean isWithin(int width, int height) {
         return 0 <= x && x < width && 0 <= y && y < height;
@@ -24,5 +26,9 @@ public record Point(int x, int y) {
 
     public Point minus(Point vector) {
         return new Point(x - vector.x, y - vector.y);
+    }
+
+    public List<Point> cardinalNeighbors() {
+        return List.of(new Point(x, y - 1), new Point(x + 1, y), new Point(x, y + 1), new Point(x - 1, y));
     }
 }
