@@ -1,11 +1,10 @@
 package org.mellowfish.adventofcode.mmxxiv;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.nio.file.Files;
 import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 class DayTwentyTwoTest {
     static final String SAMPLE_INPUT = """

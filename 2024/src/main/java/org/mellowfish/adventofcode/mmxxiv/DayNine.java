@@ -15,9 +15,9 @@ public class DayNine {
         }
 
         public void writeNewFile(int start, int length) {
-//            if (length == 0) {
-//                return;
-//            }
+            // if (length == 0) {
+            //     return;
+            // }
             for (int i = 0; i < length; i++) {
                 int index = start + i;
                 if (blocks.size() == index) {
@@ -90,7 +90,7 @@ public class DayNine {
             int clearBlocks = 0;
             int rows = (blocks.size() / 20) + 1;
             int maxRowWidth = String.valueOf(rows).length();
-            for(int i = 0; i < blocks.size(); i++) {
+            for (int i = 0; i < blocks.size(); i++) {
                 if (i % 20 == 0) {
                     System.out.println();
                     System.out.printf("%" + maxRowWidth + "d: ", (i / 20) + 1);
