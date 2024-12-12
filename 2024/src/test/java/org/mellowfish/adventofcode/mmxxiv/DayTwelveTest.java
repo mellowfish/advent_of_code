@@ -8,6 +8,10 @@ import org.junit.jupiter.api.Test;
 
 class DayTwelveTest {
     static final String SAMPLE_INPUT = """
+            AAAA
+            BBCD
+            BBCC
+            EEEC
             """;
 
     String fullInput() throws Exception {
@@ -16,17 +20,17 @@ class DayTwelveTest {
 
     @Test
     void testPartOneExample() {
-        assertEquals(41, DayTwelve.with(SAMPLE_INPUT).partOne());
+        assertEquals(140, DayTwelve.with(SAMPLE_INPUT).partOne());
     }
 
     @Test
     void testPartOneFullInput() throws Exception {
-        assertEquals(41, DayTwelve.with(fullInput()).partOne());
+        assertEquals(1375476, DayTwelve.with(fullInput()).partOne());
     }
 
     @Test
     void testPartTwoExample() {
-        assertEquals(42, DayTwelve.with(SAMPLE_INPUT).partTwo());
+        assertEquals(80, DayTwelve.with(SAMPLE_INPUT).partTwo());
     }
 
     @Test
