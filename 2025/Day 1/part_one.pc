@@ -1,0 +1,73 @@
+> Advent of Code - Day 1 - Part 1
+
+> [[source file]] as text: `example_input.txt`
+
+[[source file]] as text: `full_input.txt`
+
+Handling: Get all lines from [[a file path]]: [[source file]]
+On success with [[lines]]:
+    [[password]] as a whole number: Process all [[lines]]: [[lines]].
+    Write line `Password: {{Convert [[a whole number]]: [[password]] to text}}`
+On failure with [[error]]:
+    Write line `Failed to open input file "{{source file}}" with error {{error}}`.
+
+# To process all [[lines]]:
+
+Given:
+- [[lines]] as list of text
+
+Returns: a whole number
+
+[[the dial]] as a Dial: with [[a setting]]: $50$.
+
+Return Distill [[a list]]: [[lines]] from [[an initial value]]: $0$, transforming [[an accumulator]], and [[an item]]:
+    [[the direction]] as text: Extract text from [[some text]]: [[the item]] from the start to [[an end position]]: $1$.
+    [[the offset]] as whole number: Parse [[some text]]: (Extract text from [[some text]]: [[the item]] from [[a start position]]: $2$ to the end) as a whole number!
+
+    If Check if [[some text]]: [[the direction]] is equal to [[some other text]]: `R`:
+        Rotate [[a dial]]: [[the dial]] right by [[an offset]]: [[the offset]].
+    Otherwise:
+        Rotate [[a dial]]: [[the dial]] left by [[an offset]]: [[the offset]].
+
+    Write line `The dial is now at {{Convert [[a whole number]]: (Get [[the setting]] from [[the dial]]) to text}}`
+
+    [[the new setting]] as whole number: Get [[the setting]] from [[the dial]].
+    If $[[the new setting]] = 0$:
+        Return $[[the accumulator]] + 1$
+
+    Return [[the accumulator]]
+
+---
+
+# A Dial is a record:
+
+It has [[a setting]] as a whole number.
+It can calculate [[is reset]] as a boolean: $[[my setting]] = 0$
+
+---
+
+# To rotate [[a dial]] right by [[an offset]]:
+
+Given:
+- [[the dial]] as a Dial
+- [[the offset]] as a whole number
+
+[[the new setting]] as whole number: Get [[the setting]] from [[the dial]].
+[[the new setting]]: $([[the new setting]] + [[the offset]]) % 100$.
+
+Set [[the setting]]: [[the new setting]] for [[the dial]].
+
+---
+
+# To rotate [[a dial]] left by [[an offset]]:
+
+Given:
+- [[the dial]] as a Dial
+- [[the offset]] as a whole number
+
+[[the new setting]] as whole number: Get [[the setting]] from [[the dial]].
+[[the new setting]]: $([[the new setting]] - [[the offset]]) % 100$.
+
+Set [[the setting]]: [[the new setting]] for [[the dial]].
+
+---
